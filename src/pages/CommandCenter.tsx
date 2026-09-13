@@ -364,10 +364,10 @@ export const CommandCenter: React.FC = () => {
                   <span className="font-mono text-blue-700 font-bold">{primaryWeakCluster?.clusterRisk}/100 Cluster Risk</span>
                 </div>
                 <div className="text-xs font-semibold text-slate-800">
-                  {primaryWeakCluster?.clusterName} ({primaryWeakCluster?.installation})
+                  {primaryWeakCluster?.title} ({primaryWeakCluster?.installation})
                 </div>
                 <div className="text-[11px] text-slate-500">
-                  {primaryWeakCluster?.signalsCount || 4} correlated signals connected across {primaryWeakCluster?.asset}. Dominant precursor: {primaryWeakCluster?.dominantPrecursor}.
+                  {primaryWeakCluster?.reportIds.length || 4} correlated signals connected across {primaryWeakCluster?.asset}. Dominant precursor: {primaryWeakCluster?.dominantPrecursor}.
                 </div>
               </div>
             </div>
