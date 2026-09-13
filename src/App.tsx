@@ -28,10 +28,33 @@ import { FrontlineReporting } from './pages/FrontlineReporting';
 import { VoiceReporting } from './pages/VoiceReporting';
 import { SettingsView } from './pages/SettingsView';
 
+import { Loader2, Shield } from 'lucide-react';
+import { AuthPage } from './pages/AuthPage';
+
 export const App: React.FC = () => {
-  const { activeTab, user } = useApp();
+  const { activeTab, user, authLoading } = useApp();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  // 1. Loading state while checking persistent session
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white space-y-4">
+        <div className="w-14 h-14 rounded-2xl bg-oil-600 flex items-center justify-center font-black text-2xl shadow-xl border border-oil-500 animate-pulse">
+          OIL
+        </div>
+        <div className="flex items-center space-x-2 text-xs font-semibold text-slate-400">
+          <Loader2 className="w-4 h-4 animate-spin text-oil-400" />
+          <span>Restoring Industrial Safety Intelligence Session...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Unauthenticated Gatekeeper: Must show AuthPage first
+  if (!user) {
+    return <AuthPage />;
+  }
 
   const renderActivePage = () => {
     switch (activeTab) {

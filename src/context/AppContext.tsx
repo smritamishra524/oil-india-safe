@@ -17,6 +17,8 @@ import {
   INITIAL_PRECURSOR_VELOCITY
 } from '../data/reports';
 
+import { authService, AuthUser } from '../services/authService';
+
 export interface AppNotification {
   id: string;
   title: string;
@@ -41,7 +43,9 @@ interface AppContextType {
   searchQuery: string;
   activeTab: string;
   notifications: AppNotification[];
-  user: { name: string; role: string; organization: string } | null;
+  user: AuthUser | null;
+  authLoading: boolean;
+  authError: string | null;
   safetyDebtScore: number;
 
   setSearchQuery: (query: string) => void;
@@ -55,6 +59,10 @@ interface AppContextType {
   resetToDemo: () => void;
   preloadFlagshipJudgeDemo: () => void;
   markNotificationRead: (id: string) => void;
+  signIn: (email: string, pass: string) => Promise<void>;
+  signUp: (payload: { name: string; email: string; password: string; role: string; organization: string }) => Promise<void>;
+  forgotPassword: (email: string) => Promise<{ success: boolean; message: string; resetCode?: string }>;
+  resetPassword: (email: string, resetCode: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
   login: (name: string, role: string, org: string) => void;
   logout: () => void;
 }
@@ -132,17 +140,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return 'en';
   });
 
-  const [user, setUser] = useState<{ name: string; role: string; organization: string } | null>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.USER);
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return {
-      name: 'R. K. Barua',
-      role: 'Chief HSE Manager',
-      organization: 'Oil India Limited (Duliajan HQ)'
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Restore authenticated session on mount
+  useEffect(() => {
+    let isMounted = true;
+    authService.getSession()
+      .then(activeUser => {
+        if (isMounted) {
+          setUser(activeUser);
+          setAuthLoading(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setUser(null);
+          setAuthLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
     };
-  });
+  }, []);
 
   const [activeTab, setActiveTab] = useState<string>('command-center');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -467,12 +489,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   };
 
-  const login = (name: string, role: string, org: string) => {
-    setUser({ name, role, organization: org });
+  const signIn = async (email: string, pass: string) => {
+    setAuthError(null);
+    setAuthLoading(true);
+    try {
+      const res = await authService.signIn(email, pass);
+      setUser(res.user);
+    } catch (err: any) {
+      setAuthError(err.message || 'Sign in failed');
+      throw err;
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
-  const logout = () => {
-    setUser(null);
+  const signUp = async (payload: { name: string; email: string; password: string; role: string; organization: string }) => {
+    setAuthError(null);
+    setAuthLoading(true);
+    try {
+      const res = await authService.signUp(payload);
+      setUser(res.user);
+    } catch (err: any) {
+      setAuthError(err.message || 'Sign up failed');
+      throw err;
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const forgotPassword = async (email: string) => {
+    return authService.forgotPassword(email);
+  };
+
+  const resetPassword = async (email: string, resetCode: string, newPass: string) => {
+    return authService.resetPassword(email, resetCode, newPass);
+  };
+
+  const login = (name: string, role: string, org: string) => {
+    setUser({ id: 'usr-demo', name, role, organization: org, email: 'demo@oilindia.in' });
+  };
+
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } finally {
+      setUser(null);
+    }
   };
 
   return (
@@ -491,6 +553,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         activeTab,
         notifications,
         user,
+        authLoading,
+        authError,
         safetyDebtScore,
 
         setSearchQuery,
@@ -504,6 +568,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         resetToDemo,
         preloadFlagshipJudgeDemo,
         markNotificationRead,
+        signIn,
+        signUp,
+        forgotPassword,
+        resetPassword,
         login,
         logout
       }}

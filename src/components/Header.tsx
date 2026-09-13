@@ -9,7 +9,8 @@ import {
   ShieldCheck,
   AlertCircle,
   ExternalLink,
-  Check
+  Check,
+  LogOut
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { TRANSLATIONS } from '../utils/translations';
@@ -29,10 +30,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenUpload }) => {
     setActiveTab,
     selectReport,
     preloadFlagshipJudgeDemo,
-    user
+    user,
+    logout
   } = useApp();
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const t = TRANSLATIONS[language];
 
   const unreadNotifs = notifications.filter(n => !n.read);
@@ -188,15 +191,56 @@ export const Header: React.FC<HeaderProps> = ({ onOpenUpload }) => {
             )}
           </div>
 
-          {/* User Profile display */}
-          <div className="hidden lg:flex items-center pl-2 border-l border-slate-200 space-x-2">
-            <div className="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-700 font-bold text-xs">
-              <User className="w-4 h-4" />
-            </div>
-            <div className="text-left">
-              <div className="text-xs font-semibold text-slate-800">{user?.name || 'HSE Director'}</div>
-              <div className="text-[10px] text-slate-400 truncate max-w-[120px]">{user?.role || 'Safety Reviewer'}</div>
-            </div>
+          {/* User Profile display & Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="flex items-center pl-2 sm:pl-3 border-l border-slate-200 space-x-2 text-left hover:opacity-90 transition-opacity"
+            >
+              <div className="w-8 h-8 rounded-full bg-oil-600 border border-oil-700 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                {user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2) : 'OI'}
+              </div>
+              <div className="hidden lg:block">
+                <div className="text-xs font-bold text-slate-800 leading-tight">{user?.name || 'HSE Officer'}</div>
+                <div className="text-[10px] text-slate-500 font-medium truncate max-w-[130px]">{user?.role || 'Safety Assessor'}</div>
+              </div>
+            </button>
+
+            {isUserMenuOpen && (
+              <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-xl py-2 z-50 text-xs animate-fade-in">
+                <div className="px-4 py-3 border-b border-slate-100">
+                  <div className="font-bold text-slate-900">{user?.name}</div>
+                  <div className="text-[11px] text-slate-500 truncate">{user?.email || 'officer@oilindia.in'}</div>
+                  <div className="text-[10px] font-semibold text-oil-700 mt-1 bg-oil-50 px-2 py-0.5 rounded inline-block">
+                    {user?.organization}
+                  </div>
+                </div>
+
+                <div className="py-1">
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      setActiveTab('settings');
+                    }}
+                    className="w-full px-4 py-2 text-left hover:bg-slate-50 text-slate-700 flex items-center gap-2 transition-colors font-medium"
+                  >
+                    <User className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Account Settings</span>
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      setIsUserMenuOpen(false);
+                      await logout();
+                    }}
+                    className="w-full px-4 py-2 text-left hover:bg-rose-50 text-rose-700 flex items-center gap-2 transition-colors font-semibold border-t border-slate-100"
+                  >
+                    <LogOut className="w-3.5 h-3.5 text-rose-600" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
         </div>

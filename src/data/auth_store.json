@@ -1,0 +1,33 @@
+{
+  "users": [
+    {
+      "id": "usr-oil-001",
+      "name": "R. K. Barua",
+      "email": "rk.barua@oilindia.in",
+      "role": "Chief HSE Manager",
+      "organization": "Oil India Limited (Duliajan HQ)",
+      "passwordHash": "25109c327d652c1ab27804dfb4c1bf0f21b61da6c244cccae5499c4de8986045b996c8935de153573466d5da6dda7174c980bfbc637e3bec54d62a12d76e9ac4",
+      "salt": "a2ac99f7884b708481baf2ad962351f0",
+      "createdAt": "2026-09-13T11:14:49.802Z"
+    },
+    {
+      "id": "usr-oil-002",
+      "name": "SIH Evaluator",
+      "email": "evaluator@oilindia.in",
+      "role": "Lead Safety Assessor",
+      "organization": "Oil India Corporate Directorate",
+      "passwordHash": "0adb66202e4aa8cd9f4beed0acc4eb8ce4c3edfdada347f3df69ea1fda31c33ceb002b5ead67da5947c86a147b596b27f103b500c4989cca64033efbb03baf83",
+      "salt": "38cefd65493ba52c007f2e4baac0042f",
+      "createdAt": "2026-09-13T11:14:49.810Z"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "40c419ff577798307f379a0ca964e8225a4269923ad8ea1c0573243c4d52328f",
+      "userId": "usr-oil-001",
+      "createdAt": "2026-09-13T11:20:11.270Z",
+      "expiresAt": "2026-09-20T11:20:11.270Z"
+    }
+  ],
+  "resetTokens": {}
+}
