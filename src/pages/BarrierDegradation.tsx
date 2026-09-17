@@ -14,10 +14,10 @@ import {
 import { useApp } from '../context/AppContext';
 
 export const BarrierDegradation: React.FC = () => {
-  const { barrierHealth, reports, selectReport, setActiveTab } = useApp();
+  const { barrierHealth, reports, selectedReport, selectReport, setActiveTab } = useApp();
 
   const [selectedBarrierName, setSelectedBarrierName] = useState<string>(
-    barrierHealth[0]?.barrier || 'Energy Isolation (LOTO)'
+    selectedReport?.barrier || barrierHealth[0]?.barrier || 'Energy Isolation (LOTO)'
   );
 
   const selectedBarrier = barrierHealth.find(b => b.barrier === selectedBarrierName) || barrierHealth[0];
@@ -55,6 +55,55 @@ export const BarrierDegradation: React.FC = () => {
           </span>
         </div>
       </div>
+
+      {/* Active Report Barrier Diagnostics */}
+      {selectedReport && (
+        <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-5 text-white shadow-md border border-slate-700 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-700/60">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400 text-slate-950 uppercase tracking-wider">
+                Active Report Barrier Diagnostic
+              </span>
+              <span className="text-xs font-mono text-slate-300">
+                {selectedReport.id} • {selectedReport.asset}
+              </span>
+            </div>
+            <button
+              onClick={() => setSelectedBarrierName(selectedReport.barrier)}
+              className="text-xs font-semibold text-amber-400 hover:text-amber-300 underline underline-offset-2 flex items-center gap-1"
+            >
+              Focus on {selectedReport.barrier} below →
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs pt-1">
+            <div className="space-y-1">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Primary Barrier Evaluated</span>
+              <div className="text-sm font-bold text-white flex items-center gap-2">
+                {selectedReport.barrier}
+                <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                  selectedReport.barrierDegraded ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                }`}>
+                  {selectedReport.barrierDegraded ? 'DEGRADED / COMPROMISED' : 'INTACT'}
+                </span>
+              </div>
+              <div className="text-[11px] text-slate-300">
+                Failure Mode: <strong className="text-rose-300">{selectedReport.controlFailure}</strong>
+              </div>
+            </div>
+
+            <div className="space-y-1 md:col-span-2">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Quoted Report Evidence of Barrier Breakdown</span>
+              <div className="p-2.5 rounded-lg bg-slate-950/70 border border-slate-700 text-amber-200 text-xs italic">
+                "{selectedReport.barrierDegradationDetails?.evidence || selectedReport.evidence[0] || selectedReport.narrative}"
+              </div>
+              <div className="text-[11px] text-emerald-400 font-medium">
+                Reinforcement Mandate: {selectedReport.barrierDegradationDetails?.reinforcementAction || selectedReport.actionPlan?.immediateMitigation || 'Enforce physical verification prior to recommencing work.'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Barrier Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-3">

@@ -198,6 +198,22 @@ export const VoiceReporting: React.FC = () => {
     setRecordingState('idle');
   };
 
+  const [voiceAnalysisResult, setVoiceAnalysisResult] = useState<any | null>(null);
+
+  // Re-run real-time semantic analysis when transcript changes meaningfully
+  useEffect(() => {
+    if (transcript.trim().length > 15) {
+      const result = analyzeReportNarrative(transcript, {
+        installation: 'Duliajan Central Field',
+        asset: 'Frontline Audio Ingestion',
+        reportType: 'Near Miss'
+      });
+      setVoiceAnalysisResult(result);
+    } else {
+      setVoiceAnalysisResult(null);
+    }
+  }, [transcript]);
+
   const handleApplySampleHinglish = () => {
     setTranscript("Maintenance ke time valve properly isolate nahi tha aur line mein residual pressure tha.");
     if (recordingState === 'idle') {
@@ -213,18 +229,25 @@ export const VoiceReporting: React.FC = () => {
     setTimeout(() => {
       const analyzed = analyzeReportNarrative(transcript, {
         installation: 'Duliajan Central Field',
-        asset: 'Workover Rig WOR-07',
+        asset: 'Frontline Audio Ingestion',
         reportType: 'Near Miss'
       });
 
       analyzed.extractedFrom = `Voice Ingestion (${selectedLanguage === 'hi-IN' ? 'Hindi/Hinglish' : 'English'})`;
       analyzed.sourceType = 'voice';
 
+      setVoiceAnalysisResult(analyzed);
       addReport(analyzed);
       selectReport(analyzed.id);
       setIsProcessing(false);
+    }, 400);
+  };
+
+  const handleGoToAnalyzer = () => {
+    if (voiceAnalysisResult) {
+      selectReport(voiceAnalysisResult.id);
       setActiveTab('report-analyzer');
-    }, 600);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -457,7 +480,7 @@ export const VoiceReporting: React.FC = () => {
               </>
             ) : (
               <>
-                <span>Submit &amp; Analyze with OIL HSE Intelligence</span>
+                <span>Commit &amp; Add to Enterprise Incident Database</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -465,6 +488,134 @@ export const VoiceReporting: React.FC = () => {
         </div>
 
       </div>
+
+      {/* Structured Output Display (Real-Time Voice Intelligence) */}
+      {voiceAnalysisResult && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5 animate-fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 uppercase tracking-wider">
+                  Live Structured Intelligence Output
+                </span>
+                <span className="text-slate-300">•</span>
+                <span className="text-xs font-semibold text-slate-500">Extracted from Spoken Narrative</span>
+              </div>
+              <h2 className="text-base font-black text-slate-900 mt-1">
+                Field Observation Diagnostics: {voiceAnalysisResult.id}
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className={`px-2.5 py-1 rounded-full text-xs font-extrabold ${
+                voiceAnalysisResult.sifPrecursor !== 'No SIF'
+                  ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                  : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+              }`}>
+                {voiceAnalysisResult.sifPrecursor !== 'No SIF' ? '⚠️ Potential SIF Precursor' : '✓ Operational Observation'}
+              </span>
+              <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+                Risk Score: {voiceAnalysisResult.riskScore}/100
+              </span>
+            </div>
+          </div>
+
+          {/* 4-Box Intelligence Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            {/* Box 1: Hazards Detected */}
+            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+              <span className="text-[10px] font-bold uppercase text-slate-400 block">1. Detected Hazard</span>
+              <div className="text-xs font-bold text-slate-900">{voiceAnalysisResult.hazard}</div>
+              <p className="text-[11px] text-slate-500">
+                Operational Context: <span className="font-semibold text-slate-700">{voiceAnalysisResult.activity}</span>
+              </p>
+            </div>
+
+            {/* Box 2: SIF Indication */}
+            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+              <span className="text-[10px] font-bold uppercase text-slate-400 block">2. SIF Indication</span>
+              <div className="text-xs font-bold text-rose-700">{voiceAnalysisResult.sifPrecursor}</div>
+              <p className="text-[11px] text-slate-500">
+                Exposure: <span className="font-semibold text-slate-700">{voiceAnalysisResult.exposure}</span>
+              </p>
+            </div>
+
+            {/* Box 3: Barrier Analysis */}
+            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+              <span className="text-[10px] font-bold uppercase text-slate-400 block">3. Defensive Barrier</span>
+              <div className="text-xs font-bold text-slate-900">{voiceAnalysisResult.barrier}</div>
+              <div className={`text-[10px] font-extrabold uppercase inline-block px-1.5 py-0.5 rounded ${
+                voiceAnalysisResult.barrierDegraded ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'
+              }`}>
+                {voiceAnalysisResult.barrierDegraded ? 'Degraded / Bypassed' : 'Operational'}
+              </div>
+            </div>
+
+            {/* Box 4: Risk Interpretation */}
+            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+              <span className="text-[10px] font-bold uppercase text-slate-400 block">4. Risk Interpretation</span>
+              <div className="text-xs font-bold text-slate-900">{voiceAnalysisResult.riskLevel} Risk Exposure</div>
+              <p className="text-[11px] text-slate-500 line-clamp-2">
+                {voiceAnalysisResult.dna?.potentialConsequence || 'Consequence requires barrier restoration.'}
+              </p>
+            </div>
+
+          </div>
+
+          {/* Corrective Actions Section */}
+          <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                Recommended Corrective Action Plan
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-200/60 text-emerald-800">
+                Action Intelligence
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1 text-xs">
+              <div className="p-2.5 bg-white rounded-lg border border-emerald-100 space-y-1">
+                <span className="text-[10px] font-bold uppercase text-slate-400">Immediate Field Mitigation</span>
+                <p className="font-semibold text-slate-800">{voiceAnalysisResult.actionPlan?.immediateMitigation}</p>
+              </div>
+              <div className="p-2.5 bg-white rounded-lg border border-emerald-100 space-y-1">
+                <span className="text-[10px] font-bold uppercase text-slate-400">Engineering Barrier Restoration</span>
+                <p className="font-semibold text-slate-800">{voiceAnalysisResult.actionPlan?.engineeringBarrierAction}</p>
+              </div>
+              <div className="p-2.5 bg-white rounded-lg border border-emerald-100 space-y-1">
+                <span className="text-[10px] font-bold uppercase text-slate-400">Precursor Prevention Verification</span>
+                <p className="font-semibold text-slate-800">{voiceAnalysisResult.actionPlan?.sifPrecursorCheck}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Next Steps & Navigation Actions */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+            <span className="text-xs text-slate-500">
+              Observation captured and parsed. Select next analytical step:
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  selectReport(voiceAnalysisResult.id);
+                  setActiveTab('sif-pathway');
+                }}
+                className="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
+              >
+                Inspect Causal Pathway →
+              </button>
+              <button
+                onClick={handleGoToAnalyzer}
+                className="px-4 py-2 rounded-lg bg-oil-600 hover:bg-oil-700 text-white font-bold text-xs transition-colors shadow-sm"
+              >
+                Inspect in Full Report Analyzer →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

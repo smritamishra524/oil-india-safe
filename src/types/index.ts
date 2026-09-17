@@ -133,6 +133,65 @@ export interface HSEValidation {
   }[];
 }
 
+export type ActionStatus = 'OPEN' | 'ASSIGNED' | 'IN PROGRESS' | 'ACTION TAKEN' | 'AWAITING VERIFICATION' | 'VERIFIED' | 'CLOSED';
+
+export interface ActionPlan {
+  detectedIssue: string;
+  reasonEvidence: string;
+  correctiveActions: string[];
+  priority: 'Immediate' | 'High' | 'Medium' | 'Routine';
+  responsibleRole: string;
+  status: ActionStatus;
+}
+
+export interface PreventRecurrenceData {
+  isRecurring: boolean;
+  recurrenceReason: string;
+  similarPrecursorsCount: number;
+  similarHistoricalReports: Array<{
+    id: string;
+    asset: string;
+    similarityReason: string;
+    date: string;
+    sifPrecursor: string;
+  }>;
+  closureTracker: {
+    status: ActionStatus;
+    assignedRole: string;
+    priority: string;
+    deadline?: string;
+    verificationState: 'Pending Verification' | 'Under Review' | 'Witnessed & Verified' | 'Closed';
+    actionsTaken?: string[];
+  };
+}
+
+export interface WeakSignalItem {
+  id: string;
+  type: string;
+  name: string;
+  evidence: string;
+  severity: 'High' | 'Medium' | 'Low';
+}
+
+export interface SIFPathwayNode {
+  step: number;
+  title: string;
+  desc: string;
+  evidence: string;
+  barrier: string;
+  riskContribution: string;
+  intervention: string;
+}
+
+export interface BarrierDegradationDetail {
+  primaryDegradedBarrier: string;
+  category: 'PPE' | 'Engineering Controls' | 'Procedures' | 'Supervision' | 'Maintenance' | 'Monitoring/Detection' | 'Isolation' | 'Emergency Controls';
+  failureMode: string;
+  evidence: string;
+  degradationLevel: 'Critical' | 'Severe' | 'Moderate' | 'Minor';
+  reinforcementAction: string;
+}
+
 export interface SafetyReport {
   id: string;
   date: string;
@@ -165,6 +224,13 @@ export interface SafetyReport {
   validation: HSEValidation;
   
   sourceType: 'synthetic' | 'uploaded' | 'voice' | 'frontline';
+
+  // Upgraded Intelligence & Action Layer Fields
+  actionPlan: ActionPlan;
+  preventRecurrence: PreventRecurrenceData;
+  weakSignals: WeakSignalItem[];
+  sifPathway: SIFPathwayNode[];
+  barrierDegradationDetails: BarrierDegradationDetail;
 }
 
 export interface CorrectiveAction {
@@ -175,13 +241,16 @@ export interface CorrectiveAction {
   owner: string;
   targetDate: string;
   priority: 'Critical' | 'High' | 'Medium' | 'Low';
-  status: 'OPEN' | 'IN PROGRESS' | 'AWAITING VERIFICATION' | 'CLOSED';
+  status: ActionStatus;
   verificationMethod: string;
   verifiedBy?: string;
   verifiedAt?: string;
   barrierAddressed: string;
   installation: string;
   createdAt: string;
+  actionTakenNotes?: string;
+  isRecurringPrecursor?: boolean;
+  recurrenceNote?: string;
 }
 
 export interface AuditEvent {

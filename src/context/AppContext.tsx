@@ -6,7 +6,10 @@ import {
   WeakSignalCluster,
   BarrierHealth,
   PrecursorVelocityItem,
-  ValidationStatus
+  ValidationStatus,
+  ActionStatus,
+  ActionPlan,
+  PreventRecurrenceData
 } from '../types';
 import {
   generateInterconnectedReports,
@@ -18,6 +21,7 @@ import {
 } from '../data/reports';
 
 import { authService, AuthUser } from '../services/authService';
+import { enrichReportWithIntelligence } from '../services/reportAnalyzer';
 
 export interface AppNotification {
   id: string;
@@ -54,6 +58,8 @@ interface AppContextType {
   selectReport: (id: string) => void;
   addReport: (report: SafetyReport) => void;
   updateReportValidation: (reportId: string, status: ValidationStatus, notes?: string) => void;
+  updateReportActionPlan: (reportId: string, updates: Partial<ActionPlan>) => void;
+  updatePreventRecurrenceStatus: (reportId: string, status: ActionStatus, notes?: string) => void;
   addCorrectiveAction: (action: Omit<CorrectiveAction, 'id' | 'createdAt'>) => void;
   updateActionStatus: (actionId: string, status: CorrectiveAction['status'], verifiedBy?: string) => void;
   resetToDemo: () => void;
@@ -85,11 +91,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [reports, setReports] = useState<SafetyReport[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.REPORTS);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed: SafetyReport[] = JSON.parse(saved);
+        return parsed.map(r => enrichReportWithIntelligence(r, parsed));
+      }
     } catch (e) {
       console.error(e);
     }
-    return generateInterconnectedReports();
+    const initialList = generateInterconnectedReports();
+    return initialList.map(r => enrichReportWithIntelligence(r, initialList));
   });
 
   const [selectedReportId, setSelectedReportId] = useState<string>(() => {
@@ -299,29 +309,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addReport = (newReport: SafetyReport) => {
+    // Enrich with historical comparison against current repository
+    const enriched = enrichReportWithIntelligence(newReport, reports);
+
     // Add to reports list at top
-    setReports(prev => [newReport, ...prev]);
-    setSelectedReportId(newReport.id);
+    setReports(prev => [enriched, ...prev]);
+    setSelectedReportId(enriched.id);
+
+    // Auto-create connected Corrective Action in Action Register
+    const newActionId = `CA-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`;
+    const autoAction: CorrectiveAction = {
+      id: newActionId,
+      reportId: enriched.id,
+      title: enriched.actionPlan?.detectedIssue || `${enriched.sifPrecursor} Remediation`,
+      description: enriched.actionPlan?.correctiveActions?.join(' • ') || enriched.recommendedIntervention.primary,
+      owner: enriched.actionPlan?.responsibleRole || enriched.recommendedIntervention.responsibleRole,
+      targetDate: enriched.preventRecurrence?.closureTracker?.deadline || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      priority: enriched.actionPlan?.priority === 'Immediate' ? 'Critical' : 'High',
+      status: 'OPEN',
+      verificationMethod: enriched.recommendedIntervention.verificationStep,
+      barrierAddressed: enriched.barrier,
+      installation: enriched.installation,
+      createdAt: new Date().toLocaleString(),
+      isRecurringPrecursor: enriched.preventRecurrence?.isRecurring,
+      recurrenceNote: enriched.preventRecurrence?.recurrenceReason
+    };
+    setCorrectiveActions(prev => [autoAction, ...prev]);
 
     // Update Audit Trail
     const newAuditEvents: AuditEvent[] = [
       {
         id: `AUD-${Date.now()}-1`,
         timestamp: new Date().toLocaleString(),
-        reportId: newReport.id,
+        reportId: enriched.id,
         eventType: 'REPORT_RECEIVED',
         user: user?.name || 'Field Operator',
-        details: `Report received via ${newReport.extractedFrom || newReport.sourceType} for ${newReport.installation} (${newReport.asset}).`,
+        details: `Report received via ${enriched.extractedFrom || enriched.sourceType} for ${enriched.installation} (${enriched.asset}).`,
         severity: 'info'
       },
       {
         id: `AUD-${Date.now()}-2`,
         timestamp: new Date().toLocaleString(),
-        reportId: newReport.id,
+        reportId: enriched.id,
         eventType: 'AI_ANALYSIS_COMPLETED',
         user: 'OIL HSE Intelligence Engine',
-        details: `Extracted Precursor: "${newReport.sifPrecursor}" | Risk Score: ${newReport.riskScore} (${newReport.sifPotential}) | Barrier: "${newReport.barrier}".`,
-        severity: newReport.sifPotential === 'SIF-Capable' ? 'critical' : 'warning'
+        details: `Extracted Precursor: "${enriched.sifPrecursor}" | Risk Score: ${enriched.riskScore} (${enriched.sifPotential}) | Barrier: "${enriched.barrier}". Action Plan generated with ${enriched.actionPlan?.correctiveActions?.length || 0} corrective steps.`,
+        severity: enriched.sifPotential === 'SIF-Capable' ? 'critical' : 'warning'
       }
     ];
 
@@ -330,7 +363,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Update Barrier Health dynamically if barrier matches
     setBarrierHealth(prev => {
       return prev.map(bh => {
-        if (bh.barrier === newReport.barrier) {
+        if (bh.barrier === enriched.barrier) {
           const newFailureCount = bh.failureCount + 1;
           const newScore = Math.max(15, bh.healthScore - 6);
           const newStatus = newScore < 45 ? 'Critical' : newScore < 65 ? 'Degrading' : 'Warning';
@@ -340,7 +373,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             healthScore: newScore,
             currentStatus: newStatus as any,
             trend: 'degrading' as const,
-            relatedReportIds: [newReport.id, ...bh.relatedReportIds]
+            relatedReportIds: [enriched.id, ...bh.relatedReportIds]
           };
         }
         return bh;
@@ -350,12 +383,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Check if report integrates into Weak Signal Clusters
     setWeakSignalClusters(prev => {
       return prev.map(cluster => {
-        if (cluster.installation === newReport.installation || cluster.asset === newReport.asset || cluster.dominantPrecursor === newReport.sifPrecursor) {
+        if (cluster.installation === enriched.installation || cluster.asset === enriched.asset || cluster.dominantPrecursor === enriched.sifPrecursor) {
           return {
             ...cluster,
-            reportIds: [newReport.id, ...cluster.reportIds],
+            reportIds: [enriched.id, ...cluster.reportIds],
             timeline: [
-              { date: newReport.date, event: `New signal: ${newReport.sifPrecursor} on ${newReport.asset}`, reportId: newReport.id },
+              { date: enriched.date, event: `New signal: ${enriched.sifPrecursor} on ${enriched.asset}`, reportId: enriched.id },
               ...cluster.timeline
             ],
             clusterRisk: Math.min(98, cluster.clusterRisk + 3)
@@ -370,15 +403,90 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       {
         id: `notif-${Date.now()}`,
         title: 'New Report Analyzed',
-        message: `${newReport.sifPrecursor} detected on ${newReport.asset} (${newReport.installation}). Risk: ${newReport.riskScore}`,
+        message: `${enriched.sifPrecursor} detected on ${enriched.asset} (${enriched.installation}). Action plan generated.`,
         timestamp: 'Just now',
-        type: newReport.sifPotential === 'SIF-Capable' ? 'critical' : 'warning',
-        targetTab: 'report-analyzer',
-        targetReportId: newReport.id,
+        type: enriched.sifPotential === 'SIF-Capable' ? 'critical' : 'warning',
+        targetTab: 'command-center',
+        targetReportId: enriched.id,
         read: false
       },
       ...prev
     ]);
+  };
+
+  const updateReportActionPlan = (reportId: string, updates: Partial<ActionPlan>) => {
+    setReports(prev => prev.map(r => {
+      if (r.id === reportId) {
+        return {
+          ...r,
+          actionPlan: { ...r.actionPlan, ...updates }
+        };
+      }
+      return r;
+    }));
+  };
+
+  const updatePreventRecurrenceStatus = (reportId: string, status: ActionStatus, notes?: string) => {
+    setReports(prev => prev.map(r => {
+      if (r.id === reportId) {
+        const currentTracker = r.preventRecurrence?.closureTracker || {
+          status: 'OPEN',
+          assignedRole: r.actionPlan?.responsibleRole || 'HSE Supervisor',
+          priority: r.actionPlan?.priority || 'High',
+          verificationState: 'Pending Verification',
+          actionsTaken: []
+        };
+        const verificationState = 
+          status === 'CLOSED' ? 'Closed' :
+          status === 'VERIFIED' ? 'Witnessed & Verified' :
+          status === 'ACTION TAKEN' || status === 'AWAITING VERIFICATION' ? 'Under Review' :
+          'Pending Verification';
+        const updatedActionsTaken = notes 
+          ? [...(currentTracker.actionsTaken || []), notes] 
+          : (currentTracker.actionsTaken || []);
+
+        return {
+          ...r,
+          actionPlan: { ...r.actionPlan, status },
+          preventRecurrence: {
+            ...r.preventRecurrence,
+            closureTracker: {
+              ...currentTracker,
+              status,
+              verificationState,
+              actionsTaken: updatedActionsTaken
+            }
+          }
+        };
+      }
+      return r;
+    }));
+
+    // Sync with correctiveActions register
+    setCorrectiveActions(prev => prev.map(a => {
+      if (a.reportId === reportId) {
+        return {
+          ...a,
+          status,
+          actionTakenNotes: notes || a.actionTakenNotes,
+          verifiedBy: (status === 'CLOSED' || status === 'VERIFIED') ? (user?.name || 'HSE Inspector') : a.verifiedBy,
+          verifiedAt: (status === 'CLOSED' || status === 'VERIFIED') ? new Date().toLocaleString() : a.verifiedAt
+        };
+      }
+      return a;
+    }));
+
+    // Add audit event
+    const auditEvent: AuditEvent = {
+      id: `AUD-${Date.now()}`,
+      timestamp: new Date().toLocaleString(),
+      reportId,
+      eventType: status === 'CLOSED' ? 'ACTION_CLOSED' : 'ACTION_VERIFIED',
+      user: user?.name || 'HSE Officer',
+      details: `Action closure tracker for report ${reportId} updated to "${status}". ${notes ? `Note: ${notes}` : ''}`,
+      severity: 'info'
+    };
+    setAuditTrail(prev => [auditEvent, ...prev]);
   };
 
   const updateReportValidation = (reportId: string, status: ValidationStatus, notes?: string) => {
@@ -563,6 +671,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         selectReport,
         addReport,
         updateReportValidation,
+        updateReportActionPlan,
+        updatePreventRecurrenceStatus,
         addCorrectiveAction,
         updateActionStatus,
         resetToDemo,

@@ -20,65 +20,67 @@ export const SIFPathway: React.FC = () => {
 
   if (!selectedReport) return null;
 
-  // Build the 6-step causal escalation pathway based on report text and classification
-  const PATHWAY_NODES = [
-    {
-      step: 1,
-      title: 'Unsafe Condition / Act',
-      desc: selectedReport.narrative.slice(0, 75) + '...',
-      evidence: selectedReport.evidence[0] || 'Unsafe condition initiated during operations.',
-      barrier: selectedReport.barrier,
-      riskContribution: '15%',
-      intervention: 'Enforce pre-task Toolbox Talk and Permit-to-Work adherence.'
-    },
-    {
-      step: 2,
-      title: 'Failed / Bypassed Control',
-      desc: selectedReport.controlFailure,
-      evidence: 'Absence of physical zero-energy bleedoff verification.',
-      barrier: selectedReport.barrier,
-      riskContribution: '25%',
-      intervention: 'Independent four-eyes verification before releasing mechanical clamp.'
-    },
-    {
-      step: 3,
-      title: 'Active Hazardous Energy',
-      desc: selectedReport.hazard,
-      evidence: 'Pressurized hydrocarbon volume or elevated potential energy present.',
-      barrier: 'Pressure Relief & Bleedoff System',
-      riskContribution: '30%',
-      intervention: 'Full depressurization through flare header and drain verification.'
-    },
-    {
-      step: 4,
-      title: 'Personnel Exposure Proximity',
-      desc: selectedReport.exposure,
-      evidence: 'Crew positioned directly adjacent to unisolated wellhead cellar.',
-      barrier: 'Exclusion Zone & Barricading',
-      riskContribution: '15%',
-      intervention: 'Red-tape standoff perimeter around active hydraulic components.'
-    },
-    {
-      step: 5,
-      title: 'Direct Line of Fire',
-      desc: 'Line-of-Fire Trajectory without Standoff Barrier',
-      evidence: 'Technicians located in the discharge path of pressurized flange bolts.',
-      barrier: 'Deflection Shield & Engineered Standoff',
-      riskContribution: '20%',
-      intervention: 'Install blast deflection mats and use remote hydraulic tensioners.'
-    },
-    {
-      step: 6,
-      title: 'SIF Escalation Potential',
-      desc: selectedReport.dna.potentialConsequence,
-      evidence: 'Severe injury or fatality outcome envelope.',
-      barrier: 'Emergency Shutdown (ESD)',
-      riskContribution: 'Critical Consequence',
-      intervention: selectedReport.recommendedIntervention.primary
-    }
-  ];
+  // Use dynamic 6-step causal escalation pathway derived specifically from this report
+  const PATHWAY_NODES = (selectedReport.sifPathway && selectedReport.sifPathway.length > 0)
+    ? selectedReport.sifPathway
+    : [
+        {
+          step: 1,
+          title: 'Unsafe Condition / Act',
+          desc: selectedReport.narrative.slice(0, 75) + '...',
+          evidence: selectedReport.evidence[0] || 'Condition identified during active operations.',
+          barrier: selectedReport.barrier,
+          riskContribution: '15%',
+          intervention: 'Enforce pre-task verification and Permit-to-Work controls.'
+        },
+        {
+          step: 2,
+          title: 'Control Breakdown',
+          desc: selectedReport.controlFailure,
+          evidence: selectedReport.evidence[1] || selectedReport.controlFailure,
+          barrier: selectedReport.barrier,
+          riskContribution: '25%',
+          intervention: `Audit ${selectedReport.barrier} integrity prior to energizing line.`
+        },
+        {
+          step: 3,
+          title: 'Active Hazardous Energy',
+          desc: selectedReport.hazard,
+          evidence: `Direct exposure to ${selectedReport.hazard.toLowerCase()}.`,
+          barrier: selectedReport.barrier,
+          riskContribution: '30%',
+          intervention: 'Mandate positive energy isolation and physical zero-state lock.'
+        },
+        {
+          step: 4,
+          title: 'Personnel Exposure',
+          desc: selectedReport.exposure,
+          evidence: `Crew exposed in hazardous zone during ${selectedReport.activity.toLowerCase()}.`,
+          barrier: 'Exclusion Zone & Barricading',
+          riskContribution: '15%',
+          intervention: 'Establish strict standoff radius and access barrier controls.'
+        },
+        {
+          step: 5,
+          title: 'Line of Fire Trajectory',
+          desc: `Unshielded release trajectory during ${selectedReport.activity}`,
+          evidence: selectedReport.evidence[2] || `Direct exposure line during ${selectedReport.activity}.`,
+          barrier: 'Physical Deflection & Standoff',
+          riskContribution: '20%',
+          intervention: 'Install physical deflection shields and reposition crew outside blast envelope.'
+        },
+        {
+          step: 6,
+          title: 'SIF Escalation Potential',
+          desc: selectedReport.dna?.potentialConsequence || 'Potential critical injury or fatality.',
+          evidence: `Precursor threshold reached: ${selectedReport.sifPrecursor}`,
+          barrier: 'Emergency Response / Blowout Prevention',
+          riskContribution: 'Critical Consequence',
+          intervention: selectedReport.recommendedIntervention?.primary || 'Execute stop work order immediately.'
+        }
+      ];
 
-  const currentNode = PATHWAY_NODES[selectedNodeIndex];
+  const currentNode = PATHWAY_NODES[selectedNodeIndex] || PATHWAY_NODES[0];
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
@@ -116,6 +118,38 @@ export const SIFPathway: React.FC = () => {
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Dynamic Report Precursor Banner */}
+      <div className={`p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+        selectedReport.sifPrecursor !== 'No SIF'
+          ? 'bg-rose-50/80 border-rose-200 text-rose-950'
+          : 'bg-emerald-50/80 border-emerald-200 text-emerald-950'
+      }`}>
+        <div className="flex items-center gap-3">
+          <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold shrink-0 ${
+            selectedReport.sifPrecursor !== 'No SIF' ? 'bg-rose-600 text-white' : 'bg-emerald-600 text-white'
+          }`}>
+            <AlertTriangle className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-black uppercase tracking-wider">
+                {selectedReport.sifPrecursor !== 'No SIF' ? 'Potential SIF Precursor Detected' : 'Standard Finding (Non-SIF Precursor)'}
+              </span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/80 border border-current">
+                {selectedReport.sifPrecursor}
+              </span>
+            </div>
+            <p className="text-xs text-slate-700 mt-0.5">
+              Activity: <strong className="text-slate-900">{selectedReport.activity}</strong> • Primary Barrier at Risk: <strong className="text-slate-900">{selectedReport.barrier}</strong>
+            </p>
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          <span className="text-[10px] uppercase font-bold text-slate-500 block">Critical Barrier Status</span>
+          <span className="text-xs font-bold text-rose-700">{selectedReport.barrierDegraded ? 'DEGRADED / BYPASSED' : 'OPERATIONAL'}</span>
+        </div>
       </div>
 
       {/* Pathway Node Graph Flow */}

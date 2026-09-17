@@ -33,10 +33,10 @@ export const SIFPrecursorDNA: React.FC = () => {
       value: dna.activity,
       icon: Activity,
       color: 'border-blue-500 text-blue-700 bg-blue-50',
-      evidence: `Operational task: ${dna.activity} conducted on ${selectedReport.asset}.`,
-      confidence: 96,
+      evidence: selectedReport.evidence.find(e => e.toLowerCase().includes(dna.activity.toLowerCase())) || `Operational task: ${dna.activity} conducted on ${selectedReport.asset}.`,
+      confidence: selectedReport.confidence,
       riskContribution: '15%',
-      recommendedControl: 'Verify current approved Standard Operating Procedure (SOP) and Permit-to-Work.'
+      recommendedControl: `Verify current approved Standard Operating Procedure (SOP) and Permit-to-Work for ${dna.activity}.`
     },
     {
       id: 'hazard',
@@ -45,10 +45,10 @@ export const SIFPrecursorDNA: React.FC = () => {
       value: dna.hazard,
       icon: Flame,
       color: 'border-amber-500 text-amber-700 bg-amber-50',
-      evidence: selectedReport.evidence[0] || 'High-risk energy source identified in operating envelope.',
-      confidence: 94,
+      evidence: selectedReport.evidence[0] || `Active hazardous energy source: ${dna.hazard} identified in operating envelope.`,
+      confidence: Math.min(98, selectedReport.confidence + 2),
       riskContribution: '35%',
-      recommendedControl: 'Positive de-energization, continuous gas detection, and primary containment verification.'
+      recommendedControl: selectedReport.actionPlan?.correctiveActions?.[0] || 'Positive de-energization, continuous monitoring, and primary containment verification.'
     },
     {
       id: 'exposure',
@@ -57,8 +57,8 @@ export const SIFPrecursorDNA: React.FC = () => {
       value: dna.exposure,
       icon: UserCheck,
       color: 'border-orange-500 text-orange-700 bg-orange-50',
-      evidence: `Personnel envelope: ${dna.exposure} during maintenance intervention.`,
-      confidence: 91,
+      evidence: selectedReport.evidence.find(e => /worker|technician|personnel|crew|derrickman/i.test(e)) || `Personnel envelope: ${dna.exposure} during operations.`,
+      confidence: Math.max(85, selectedReport.confidence - 3),
       riskContribution: '20%',
       recommendedControl: 'Rigid standoff barricading and strict enforcement of line-of-fire exclusion zone.'
     },
@@ -69,10 +69,10 @@ export const SIFPrecursorDNA: React.FC = () => {
       value: dna.barrier,
       icon: Shield,
       color: 'border-rose-500 text-rose-700 bg-rose-50',
-      evidence: `Failed or challenged safety barrier: ${dna.barrier}.`,
-      confidence: 95,
+      evidence: `Challenged safety barrier: ${dna.barrier}. ${selectedReport.barrierDegradationDetails?.failureMode || ''}`,
+      confidence: selectedReport.confidence,
       riskContribution: '30%',
-      recommendedControl: 'Double Block and Bleed / LOTO lockout hardware / 100% tie-off compliance.'
+      recommendedControl: selectedReport.barrierDegradationDetails?.reinforcementAction || selectedReport.recommendedIntervention.primary
     },
     {
       id: 'controlFailure',
@@ -81,10 +81,10 @@ export const SIFPrecursorDNA: React.FC = () => {
       value: dna.controlFailure,
       icon: AlertTriangle,
       color: 'border-red-600 text-red-800 bg-red-50',
-      evidence: selectedReport.evidence[1] || 'Omission of verification step prior to line breaking.',
-      confidence: 92,
+      evidence: selectedReport.evidence[1] || selectedReport.evidence[0] || `Omission or breakdown: ${dna.controlFailure}`,
+      confidence: Math.max(88, selectedReport.confidence - 2),
       riskContribution: '25%',
-      recommendedControl: 'Four-eyes independent physical witness check by area HSE authority.'
+      recommendedControl: `Independent four-eyes witness check and formal supervisor sign-off before commencing work.`
     },
     {
       id: 'sifPrecursor',
@@ -93,10 +93,10 @@ export const SIFPrecursorDNA: React.FC = () => {
       value: dna.sifPrecursor,
       icon: Dna,
       color: 'border-rose-600 text-rose-900 bg-rose-100',
-      evidence: `High SIF Precursor flagged by deterministic NLP model (${selectedReport.confidence}% confidence).`,
+      evidence: `Potential SIF precursor detected: ${dna.sifPrecursor} (${selectedReport.confidence}% model confidence).`,
       confidence: selectedReport.confidence,
       riskContribution: '40%',
-      recommendedControl: selectedReport.recommendedIntervention.primary
+      recommendedControl: selectedReport.actionPlan?.correctiveActions?.[1] || selectedReport.recommendedIntervention.primary
     },
     {
       id: 'iogpRule',
@@ -117,10 +117,10 @@ export const SIFPrecursorDNA: React.FC = () => {
       value: dna.potentialConsequence,
       icon: AlertTriangle,
       color: 'border-purple-600 text-purple-900 bg-purple-50',
-      evidence: 'Worst credible operational escalation without human or physical intervention.',
-      confidence: 89,
+      evidence: `Worst credible operational escalation: ${dna.potentialConsequence}`,
+      confidence: Math.max(82, selectedReport.confidence - 5),
       riskContribution: 'Severe / Catastrophic',
-      recommendedControl: 'Emergency shutdown activation and immediate personnel evacuation protocol.'
+      recommendedControl: 'Emergency isolation, physical stand-down, and personnel evacuation protocol.'
     }
   ];
 

@@ -81,13 +81,13 @@ export const CorrectiveActionsView: React.FC = () => {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center justify-between border-b border-slate-200">
-        <div className="flex space-x-1">
-          {['ALL', 'OPEN', 'IN PROGRESS', 'AWAITING VERIFICATION', 'CLOSED'].map((status) => (
+      <div className="flex items-center justify-between border-b border-slate-200 overflow-x-auto pb-1">
+        <div className="flex space-x-1 min-w-max">
+          {['ALL', 'OPEN', 'ASSIGNED', 'IN PROGRESS', 'ACTION TAKEN', 'AWAITING VERIFICATION', 'CLOSED'].map((status) => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
-              className={`pb-2.5 px-3.5 text-xs font-bold border-b-2 transition-all ${
+              className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all ${
                 statusFilter === status
                   ? 'border-oil-600 text-oil-700'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -97,7 +97,7 @@ export const CorrectiveActionsView: React.FC = () => {
             </button>
           ))}
         </div>
-        <span className="text-xs text-slate-400 font-mono hidden sm:inline">
+        <span className="text-xs text-slate-400 font-mono hidden sm:inline ml-4 shrink-0">
           {filteredActions.length} Actions displayed
         </span>
       </div>
@@ -107,7 +107,9 @@ export const CorrectiveActionsView: React.FC = () => {
         {filteredActions.map((action) => {
           const isClosed = action.status === 'CLOSED';
           const isAwaiting = action.status === 'AWAITING VERIFICATION';
+          const isActionTaken = action.status === 'ACTION TAKEN';
           const isCritical = action.priority === 'Critical';
+          const linkedReport = reports.find(r => r.id === action.reportId);
 
           return (
             <div
@@ -115,10 +117,24 @@ export const CorrectiveActionsView: React.FC = () => {
               className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4 hover:border-slate-300 transition-all"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100 text-xs">
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="font-mono font-bold text-oil-700">{action.id}</span>
                   <span className="text-slate-300">•</span>
                   <span className="font-semibold text-slate-700">{action.installation}</span>
+                  {linkedReport && (
+                    <>
+                      <span className="text-slate-300">•</span>
+                      <span className="px-2 py-0.5 rounded bg-slate-100 font-mono text-slate-600 font-bold text-[10px]">
+                        Linked: {linkedReport.id}
+                      </span>
+                      {linkedReport.preventRecurrence?.isRecurring && (
+                        <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-bold text-[10px] flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3" />
+                          Potential Recurring Precursor
+                        </span>
+                      )}
+                    </>
+                  )}
                   <span className="text-slate-300">•</span>
                   <span className="text-slate-400">Target: {action.targetDate}</span>
                 </div>
@@ -136,12 +152,16 @@ export const CorrectiveActionsView: React.FC = () => {
                     className={`text-xs font-bold px-2 py-1 rounded-md border outline-none cursor-pointer ${
                       isClosed ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
                       isAwaiting ? 'bg-purple-50 text-purple-800 border-purple-300' :
+                      isActionTaken ? 'bg-cyan-50 text-cyan-800 border-cyan-300' :
                       action.status === 'IN PROGRESS' ? 'bg-blue-50 text-blue-800 border-blue-300' :
+                      action.status === 'ASSIGNED' ? 'bg-indigo-50 text-indigo-800 border-indigo-300' :
                       'bg-amber-50 text-amber-800 border-amber-300'
                     }`}
                   >
                     <option value="OPEN">OPEN</option>
+                    <option value="ASSIGNED">ASSIGNED</option>
                     <option value="IN PROGRESS">IN PROGRESS</option>
+                    <option value="ACTION TAKEN">ACTION TAKEN</option>
                     <option value="AWAITING VERIFICATION">AWAITING VERIFICATION</option>
                     <option value="CLOSED">CLOSED</option>
                   </select>
