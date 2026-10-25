@@ -1,0 +1,58 @@
+[
+  {
+    "id": "AP-AUD-1792939448093",
+    "timestamp": "2026-10-25T14:44:08.093Z",
+    "prompt": "Identify SIF precursor evidence from report, formulate corrective mitigation, and dispatch verified work order to OIL CMMS.",
+    "reportId": "OIL-REP-2026-1001",
+    "actionTitle": "Halt mechanical unbolting and secure danger zone around pressurized valve assembly.",
+    "targetApp": "OIL SAP-PM Safety Task Dispatcher & CMMS Portal",
+    "stepsCount": 6,
+    "approvedBy": "R. K. Barua",
+    "status": "Completed and verified",
+    "dispatchedTaskId": "OIL-WO-2026-4115",
+    "verificationEvidence": "Token: VTOK-8c0b47a51644f93b • Verification Endpoint: /api/cmms/verify/OIL-WO-2026-4115",
+    "executionDurationMs": 7
+  },
+  {
+    "id": "AP-AUD-1792934707072",
+    "timestamp": "2026-10-25T13:25:07.072Z",
+    "prompt": "Identify SIF precursor evidence from report, formulate corrective mitigation, and dispatch verified work order to OIL CMMS.",
+    "reportId": "OIL-REP-2026-1001",
+    "actionTitle": "Halt mechanical unbolting and secure danger zone around pressurized valve assembly.",
+    "targetApp": "OIL SAP-PM Safety Task Dispatcher & CMMS Portal",
+    "stepsCount": 6,
+    "approvedBy": "R. K. Barua",
+    "status": "Completed and verified",
+    "dispatchedTaskId": "OIL-WO-2026-9020",
+    "verificationEvidence": "Token: VTOK-01ce35d084422f16 • Verification Endpoint: /api/cmms/verify/OIL-WO-2026-9020",
+    "executionDurationMs": 4
+  },
+  {
+    "id": "AP-AUD-1792934477310",
+    "timestamp": "2026-10-25T13:21:17.310Z",
+    "prompt": "Identify SIF precursor evidence from report, formulate corrective mitigation, and dispatch verified work order to OIL CMMS.",
+    "reportId": "OIL-REP-2026-1001",
+    "actionTitle": "Halt mechanical unbolting and secure danger zone around pressurized valve assembly.",
+    "targetApp": "OIL SAP-PM Safety Task Dispatcher & CMMS Portal",
+    "stepsCount": 6,
+    "approvedBy": "R. K. Barua",
+    "status": "Completed and verified",
+    "dispatchedTaskId": "OIL-WO-2026-3430",
+    "verificationEvidence": "Token: VTOK-25dfff23e7e49cd5 • Verification Endpoint: /api/cmms/verify/OIL-WO-2026-3430",
+    "executionDurationMs": 13
+  },
+  {
+    "id": "AP-AUD-1792933193301",
+    "timestamp": "2026-10-25T12:59:53.301Z",
+    "prompt": "Identify SIF precursor evidence from report, formulate corrective mitigation, and dispatch verified work order to OIL CMMS.",
+    "reportId": "OIL-REP-2026-1001",
+    "actionTitle": "Halt mechanical unbolting and secure danger zone around pressurized valve assembly.",
+    "targetApp": "OIL SAP-PM Safety Task Dispatcher & CMMS Portal",
+    "stepsCount": 6,
+    "approvedBy": "R. K. Barua",
+    "status": "Completed and verified",
+    "dispatchedTaskId": "OIL-WO-2026-1846",
+    "verificationEvidence": "Token: VTOK-41d81b1dd4cb356a • Verification Endpoint: /api/cmms/verify/OIL-WO-2026-1846",
+    "executionDurationMs": 17
+  }
+]

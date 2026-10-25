@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OIL SAP-PM Safety Task Dispatcher & CMMS Portal</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23ea580c'/><text x='50' y='65' font-size='42' font-weight='900' fill='white' text-anchor='middle'>OIL</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
+    .badge-pulse { animation: pulse-subtle 2s infinite ease-in-out; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased">
+  <!-- Top Corporate Ribbon -->
+  <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-orange-600 flex items-center justify-center font-black text-xl text-white shadow-lg border border-orange-500">
+          OIL
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-sm font-black tracking-wider text-white">OIL INDIA LIMITED • SAP PM & OISD CMMS</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">
+              DISPATCHER v4.2
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400">Plant Maintenance & Supervisory Corrective Action Execution Subsystem</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3 text-xs">
+        <div class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span class="text-slate-300 font-mono text-[11px]">API: ONLINE (PORT 5173)</span>
+        </div>
+        <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-all border border-slate-700">
+          ← Back to SAFE-X
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <!-- Notice Bar -->
+    <div class="p-4 rounded-xl bg-orange-950/40 border border-orange-800/60 flex items-start justify-between text-xs text-orange-200/90 gap-3">
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 rounded bg-orange-600 text-white font-bold text-[10px]">AUTHORIZED ENDPOINT</span>
+        <span>Connected Industrial Destination Portal for Autonomous Browser Agents & AdaL Workflows. Tasks submitted here receive cryptographic verification tokens and sync with SAFE-X.</span>
+      </div>
+      <button onclick="refreshTasks()" class="px-3 py-1 bg-orange-600/80 hover:bg-orange-600 text-white rounded font-bold text-[11px] transition-all">
+        ↻ Refresh Registry
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- Left Column: Real Task Creation Form -->
+      <section class="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+        <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-black text-white flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+              Dispatch Work Order / Safety Task
+            </h2>
+            <p class="text-xs text-slate-400">Autonomous Form with Direct DOM Selectors for Browser Agents</p>
+          </div>
+          <span id="form-ready-badge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            READY FOR INGESTION
+          </span>
+        </div>
+
+        <form id="cmms-task-form" onsubmit="handleTaskSubmit(event)" class="space-y-4 text-xs">
+          <div>
+            <label for="task-title" class="block font-bold text-slate-300 mb-1">
+              Work Order Title <span class="text-rose-400">*</span>
+            </label>
+            <input
+              type="text"
+              id="task-title"
+              name="title"
+              required
+              placeholder="e.g. Isolate high-pressure bleed line and lock out bypass valve on Rig 4"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="task-installation" class="block font-bold text-slate-300 mb-1">
+                Installation Location <span class="text-rose-400">*</span>
+              </label>
+              <select
+                id="task-installation"
+                name="installation"
+                required
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+              >
+                <option value="Duliajan Central Field">Duliajan Central Field</option>
+                <option value="Jorhat Exploration Rig 4">Jorhat Exploration Rig 4</option>
+                <option value="Moran Oil Field">Moran Oil Field</option>
+                <option value="Digboi Refinery Area">Digboi Refinery Area</option>
+                <option value="Bagjan Wellsite">Bagjan Wellsite</option>
+                <option value="Rajasthan Block-RJ">Rajasthan Block-RJ</option>
+                <option value="Dandewala Gas Plant">Dandewala Gas Plant</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="task-asset" class="block font-bold text-slate-300 mb-1">
+                Target Asset Tag <span class="text-rose-400">*</span>
+              </label>
+              <input
+                type="text"
+                id="task-asset"
+                name="asset"
+                required
+                placeholder="e.g. Workover Rig WOR-07 / SEP-04"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="task-hazard-type" class="block font-bold text-slate-300 mb-1">
+                Hazard Classification <span class="text-rose-400">*</span>
+              </label>
+              <select
+                id="task-hazard-type"
+                name="hazardType"
+                required
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+              >
+                <option value="Stored / Residual Energy">Stored / Residual Energy</option>
+                <option value="Hydrocarbon Gas Release">Hydrocarbon Gas Release</option>
+                <option value="Fall from Height">Fall from Height</option>
+                <option value="Dropped Object">Dropped Object</option>
+                <option value="High Pressure Fluid">High Pressure Fluid</option>
+                <option value="Line of Fire (Machinery/Tension)">Line of Fire</option>
+                <option value="Oxygen Deficiency / Toxic Fumes">Oxygen Deficiency / Toxic Fumes</option>
+                <option value="Ignition Source in Hazardous Zone">Ignition Source in Hazardous Zone</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="task-barrier" class="block font-bold text-slate-300 mb-1">
+                Barrier Addressed <span class="text-rose-400">*</span>
+              </label>
+              <select
+                id="task-barrier"
+                name="barrierAddressed"
+                required
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+              >
+                <option value="Energy Isolation (LOTO)">Energy Isolation (LOTO)</option>
+                <option value="Pressure Relief & Bleedoff System">Pressure Relief & Bleedoff System</option>
+                <option value="Fall Protection System">Fall Protection System</option>
+                <option value="Certified Lifting Rigging & Plan">Certified Lifting Rigging & Plan</option>
+                <option value="Gas Detection & Monitoring">Gas Detection & Monitoring</option>
+                <option value="Permit to Work (PTW) & JSA">Permit to Work (PTW) & JSA</option>
+                <option value="Exclusion Zone & Barricading">Exclusion Zone & Barricading</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="task-precursor" class="block font-bold text-slate-300 mb-1">
+              SIF Precursor DNA & Root Indicator
+            </label>
+            <input
+              type="text"
+              id="task-precursor"
+              name="precursorDna"
+              placeholder="e.g. Energy Isolation Failure • Pressure Bleedoff System Degradation"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
+            />
+          </div>
+
+          <div>
+            <label for="task-description" class="block font-bold text-slate-300 mb-1">
+              Supervisory Action & Engineering Mitigation <span class="text-rose-400">*</span>
+            </label>
+            <textarea
+              id="task-description"
+              name="description"
+              rows="3"
+              required
+              placeholder="Describe exact physical intervention required on site..."
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
+            ></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="task-owner" class="block font-bold text-slate-300 mb-1">
+                Assignee / Role <span class="text-rose-400">*</span>
+              </label>
+              <input
+                type="text"
+                id="task-owner"
+                name="owner"
+                required
+                placeholder="e.g. Rig Safety Officer"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
+              />
+            </div>
+
+            <div>
+              <label for="task-priority" class="block font-bold text-slate-300 mb-1">
+                Priority Level <span class="text-rose-400">*</span>
+              </label>
+              <select
+                id="task-priority"
+                name="priority"
+                required
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+              >
+                <option value="Critical">Critical (Immediate Stop-Work)</option>
+                <option value="High" selected>High (Within 24 Hours)</option>
+                <option value="Medium">Medium (72 Hours)</option>
+                <option value="Routine">Routine (Weekly)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="task-deadline" class="block font-bold text-slate-300 mb-1">
+                Target Deadline <span class="text-rose-400">*</span>
+              </label>
+              <input
+                type="date"
+                id="task-deadline"
+                name="targetDate"
+                required
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="task-verification-method" class="block font-bold text-slate-300 mb-1">
+              Supervisory Verification Protocol <span class="text-rose-400">*</span>
+            </label>
+            <input
+              type="text"
+              id="task-verification-method"
+              name="verificationMethod"
+              required
+              value="Supervisory physical witness test and zero-energy pressure bleed tag verification."
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
+            />
+          </div>
+
+          <div class="pt-2 flex items-center justify-between">
+            <span id="submit-status-text" class="text-[11px] text-slate-400">
+              Form valid. Awaiting agent execution.
+            </span>
+            <button
+              type="submit"
+              id="task-submit-btn"
+              class="px-5 py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 active:scale-95 font-bold text-white text-xs shadow-lg transition-all flex items-center gap-2"
+            >
+              <span id="submit-btn-icon">⚡</span>
+              <span id="submit-btn-text">Dispatch Work Order</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Live Submission Result Banner (Hidden initially) -->
+        <div id="submission-result" class="hidden p-4 rounded-xl bg-emerald-950/50 border border-emerald-700 text-emerald-200 text-xs space-y-2">
+          <div class="flex items-center justify-between font-bold text-white">
+            <span class="flex items-center gap-1.5">
+              <span class="text-emerald-400">✓</span> Work Order Dispatched & Verified
+            </span>
+            <span id="res-task-id" class="font-mono text-emerald-300 bg-emerald-900/60 px-2 py-0.5 rounded border border-emerald-600">
+              OIL-WO-2026-XXXX
+            </span>
+          </div>
+          <p id="res-message" class="text-slate-300"></p>
+          <div class="pt-2 border-t border-emerald-900/60 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+            <span>Verification Token: <span id="res-token" class="text-emerald-300"></span></span>
+            <span id="res-timestamp"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Verification Inspector & Live Registry -->
+      <section class="lg:col-span-5 space-y-6">
+        <!-- Independent Verification Widget -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+          <div class="border-b border-slate-800 pb-2">
+            <h3 class="text-sm font-black text-white flex items-center gap-2">
+              <span class="text-orange-400 font-mono">#</span>
+              Independent Task Verifier
+            </h3>
+            <p class="text-[11px] text-slate-400">Verify authenticity of any dispatched task via direct cryptographic hash</p>
+          </div>
+
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="verify-input-id"
+              placeholder="e.g. OIL-WO-2026-1041"
+              class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white uppercase font-mono placeholder:normal-case placeholder-slate-500 focus:outline-none focus:border-orange-500"
+            />
+            <button
+              onclick="verifyTaskFromInput()"
+              id="verify-submit-btn"
+              class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold text-xs border border-slate-700 transition"
+            >
+              Verify
+            </button>
+          </div>
+
+          <div id="verify-output" class="hidden p-3 rounded-xl bg-slate-900 border border-slate-800 text-[11px] space-y-1.5 font-mono">
+          </div>
+        </div>
+
+        <!-- Dispatched Tasks Live Feed -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <h3 class="text-sm font-black text-white">Dispatched Work Orders</h3>
+            <span id="task-count-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300">
+              0 tasks
+            </span>
+          </div>
+
+          <div id="tasks-feed" class="space-y-3 max-h-[460px] overflow-y-auto pr-1">
+            <div class="text-center py-6 text-slate-500 text-xs">Loading tasks...</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Set default deadline to 3 days in future
+    const defDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    document.getElementById('task-deadline').value = defDate;
+
+    async function refreshTasks() {
+      try {
+        const res = await fetch('/api/cmms/tasks');
+        if (!res.ok) throw new Error('Failed to fetch tasks');
+        const data = await res.json();
+        renderTasks(data.tasks || []);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderTasks(tasks) {
+      const feed = document.getElementById('tasks-feed');
+      document.getElementById('task-count-badge').innerText = `${tasks.length} tasks`;
+
+      if (tasks.length === 0) {
+        feed.innerHTML = '<div class="text-center py-6 text-slate-500 text-xs">No dispatched tasks yet.</div>';
+        return;
+      }
+
+      feed.innerHTML = tasks.map(t => `
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 transition space-y-2 text-xs">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-mono font-bold text-orange-400">${t.id}</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+              t.status === 'VERIFIED' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' :
+              t.status === 'IN_PROGRESS' ? 'bg-amber-950 text-amber-400 border border-amber-800' :
+              'bg-blue-950 text-blue-400 border border-blue-800'
+            }">${t.status}</span>
+          </div>
+          <div class="font-bold text-white text-xs line-clamp-1">${t.title}</div>
+          <div class="text-[11px] text-slate-400 flex flex-wrap gap-2">
+            <span>📍 ${t.installation}</span>
+            <span>⚙️ ${t.asset}</span>
+            <span>👤 ${t.owner}</span>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-500">
+            <span>Priority: <strong class="text-slate-300">${t.priority}</strong></span>
+            <button onclick="document.getElementById('verify-input-id').value='${t.id}'; verifyTaskFromInput();" class="text-orange-400 hover:underline">
+              Inspect Token →
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function handleTaskSubmit(e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn = document.getElementById('task-submit-btn');
+      const btnText = document.getElementById('submit-btn-text');
+      const statusText = document.getElementById('submit-status-text');
+
+      btn.disabled = true;
+      btnText.innerText = 'Dispatching to CMMS...';
+      statusText.innerText = 'Submitting task payload to database...';
+
+      const payload = {
+        title: form.title.value.trim(),
+        installation: form.installation.value,
+        asset: form.asset.value.trim(),
+        hazardType: form.hazardType.value,
+        precursorDna: form.precursorDna.value.trim(),
+        barrierAddressed: form.barrierAddressed.value,
+        description: form.description.value.trim(),
+        owner: form.owner.value.trim(),
+        priority: form.priority.value,
+        targetDate: form.targetDate.value,
+        verificationMethod: form.verificationMethod.value.trim(),
+        dispatchedBy: 'Browser Automation Agent / AdaL Multimodal Companion'
+      };
+
+      try {
+        const res = await fetch('/api/cmms/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Submission failed');
+
+        // Show result banner
+        const resBox = document.getElementById('submission-result');
+        document.getElementById('res-task-id').innerText = data.task.id;
+        document.getElementById('res-message').innerText = `Task "${data.task.title}" has been successfully created in the OIL Industrial CMMS system with priority ${data.task.priority}.`;
+        document.getElementById('res-token').innerText = data.task.verificationToken;
+        document.getElementById('res-timestamp').innerText = new Date(data.task.createdAt).toLocaleString();
+        resBox.classList.remove('hidden');
+
+        statusText.innerText = `Dispatched successfully as ${data.task.id}.`;
+        refreshTasks();
+
+        // Scroll to result
+        resBox.scrollIntoView({ behavior: 'smooth' });
+      } catch (err) {
+        statusText.innerText = `Error: ${err.message}`;
+        alert(`Task dispatch failed: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+        btnText.innerText = 'Dispatch Work Order';
+      }
+    }
+
+    async function verifyTaskFromInput() {
+      const id = document.getElementById('verify-input-id').value.trim();
+      const out = document.getElementById('verify-output');
+      if (!id) return;
+
+      out.classList.remove('hidden');
+      out.innerHTML = '<span class="text-slate-400">Querying independent CMMS verification endpoint...</span>';
+
+      try {
+        const res = await fetch(`/api/cmms/verify/${encodeURIComponent(id)}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          out.innerHTML = `<span class="text-rose-400">✗ Verification Failed: ${data.error || 'Task not found'}</span>`;
+          return;
+        }
+
+        out.innerHTML = `
+          <div class="text-emerald-400 font-bold">✓ VERIFIED AUTHENTIC TASK</div>
+          <div>Task ID: <span class="text-white">${data.task.id}</span></div>
+          <div>Title: <span class="text-slate-300">${data.task.title}</span></div>
+          <div>Status: <span class="text-orange-400">${data.task.status}</span></div>
+          <div>Location: <span class="text-slate-300">${data.task.installation} (${data.task.asset})</span></div>
+          <div>Token: <span class="text-emerald-300">${data.task.verificationToken}</span></div>
+          <div>Timestamp: <span class="text-slate-400">${data.task.createdAt}</span></div>
+          <div class="text-[10px] text-slate-500 pt-1">Cryptographic match: ${data.integrityValid ? 'VALID' : 'INVALID'}</div>
+        `;
+      } catch (err) {
+        out.innerHTML = `<span class="text-rose-400">✗ Network verification error: ${err.message}</span>`;
+      }
+    }
+
+    // Initial load
+    refreshTasks();
+  </script>
+</body>
+</html>

@@ -27,6 +27,7 @@ import { KnowledgeBaseView } from './pages/KnowledgeBaseView';
 import { FrontlineReporting } from './pages/FrontlineReporting';
 import { VoiceReporting } from './pages/VoiceReporting';
 import { SettingsView } from './pages/SettingsView';
+import { AutopilotWorkspace } from './pages/AutopilotWorkspace';
 
 import { Loader2, Shield } from 'lucide-react';
 import { AuthPage } from './pages/AuthPage';
@@ -101,6 +102,8 @@ export const App: React.FC = () => {
         return <VoiceReporting />;
       case 'settings':
         return <SettingsView />;
+      case 'autopilot':
+        return <AutopilotWorkspace />;
       default:
         return <CommandCenter />;
     }

@@ -23,12 +23,6 @@
   ],
   "sessions": [
     {
-      "token": "40c419ff577798307f379a0ca964e8225a4269923ad8ea1c0573243c4d52328f",
-      "userId": "usr-oil-001",
-      "createdAt": "2026-09-13T11:20:11.270Z",
-      "expiresAt": "2026-09-20T11:20:11.270Z"
-    },
-    {
       "token": "da252fcfb5af8fa48b8d9a7e7f01153b79341697e0b7592765ba000ae57be0fd",
       "userId": "usr-oil-001",
       "createdAt": "2026-09-13T12:08:45.793Z",

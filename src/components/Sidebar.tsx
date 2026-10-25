@@ -55,6 +55,15 @@ export const Sidebar: React.FC = () => {
     { id: 'oil-safety-ai', label: 'Safety Copilot', icon: Bot, badge: 'AI', badgeColor: 'bg-oil-800 text-oil-200 border border-oil-600' }
   ];
 
+  // Microsoft Hackathon Track 1 Autonomous Browser Companion
+  const AUTOPILOT_DESTINATION: NavItem = {
+    id: 'autopilot',
+    label: 'SAFE-X Autopilot',
+    icon: Sparkles,
+    badge: 'AdaL Agent',
+    badgeColor: 'bg-emerald-900/60 text-emerald-300 border border-emerald-700/50'
+  };
+
   // Secondary / Detailed Intelligence Sub-pages (Preserving all existing functionality)
   const DETAILED_GROUPS: { groupName: string; items: NavItem[] }[] = [
     {
@@ -75,10 +84,6 @@ export const Sidebar: React.FC = () => {
         { id: 'early-warning', label: 'Early Warning Center', icon: AlertTriangle },
         { id: 'rca', label: 'Root Cause Analysis', icon: GitPullRequest },
         { id: 'historical-similarity', label: 'Historical Similarity', icon: History },
-        { id: 'missing-evidence', label: 'Missing Evidence Analysis', icon: FileQuestion },
-        { id: 'contradiction-detection', label: 'Contradiction Detection', icon: AlertOctagon },
-        { id: 'asset-intelligence', label: 'Asset Intelligence', icon: Layers },
-        { id: 'frontline-report', label: 'Frontline Hazard Report', icon: Send },
         { id: 'knowledge-base', label: 'Safety Knowledge Base', icon: BookOpen },
         { id: 'settings', label: 'System Settings', icon: Settings }
       ]
@@ -132,6 +137,36 @@ export const Sidebar: React.FC = () => {
               </button>
             );
           })}
+        </div>
+
+        {/* AUTONOMOUS AGENT COMPANION (TRACK 1) */}
+        <div className="pt-2 border-t border-slate-800/80">
+          <div className="px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+            Autonomous Companion
+          </div>
+          {(() => {
+            const Icon = AUTOPILOT_DESTINATION.icon;
+            const isActive = activeTab === AUTOPILOT_DESTINATION.id;
+            return (
+              <button
+                onClick={() => setActiveTab(AUTOPILOT_DESTINATION.id)}
+                id={`nav-${AUTOPILOT_DESTINATION.id}`}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
+                  isActive
+                    ? 'bg-emerald-600 text-white shadow-md font-bold border border-emerald-500'
+                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center space-x-2.5 truncate">
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-emerald-400 group-hover:text-emerald-300'}`} />
+                  <span className="truncate">{AUTOPILOT_DESTINATION.label}</span>
+                </div>
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 bg-emerald-900/80 text-emerald-300 border border-emerald-700/50">
+                  {AUTOPILOT_DESTINATION.badge}
+                </span>
+              </button>
+            );
+          })()}
         </div>
 
         {/* SECONDARY / DETAILED INTELLIGENCE DRAWER */}
