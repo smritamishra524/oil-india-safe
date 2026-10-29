@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, FileText, AlertTriangle, CheckCircle2, Loader2, X, ArrowRight, Sparkles, FileSpreadsheet, File } from 'lucide-react';
 import { extractTextFromFile, ExtractionResult } from '../services/textExtractor';
-import { analyzeReportNarrative } from '../services/reportAnalyzer';
+import { analyzeReportNarrative, analyzeReportNarrativeAsync, inferAssetAndInstallationFromText } from '../services/reportAnalyzer';
 import { useApp } from '../context/AppContext';
 
 interface ReportUploadModalProps {
@@ -50,6 +50,7 @@ export const ReportUploadModal: React.FC<ReportUploadModalProps> = ({ isOpen, on
   const [installation, setInstallation] = useState('Duliajan Central Field');
   const [asset, setAsset] = useState('Workover Rig WOR-07');
   const [reportType, setReportType] = useState('Incident Precursor');
+  const [assetManuallyModified, setAssetManuallyModified] = useState(false);
 
   if (!isOpen) return null;
 
@@ -85,6 +86,15 @@ export const ReportUploadModal: React.FC<ReportUploadModalProps> = ({ isOpen, on
         if (result.warning) {
           setWarningMessage(result.warning);
         }
+
+        // Auto-detect asset and installation from extracted narrative
+        const inferred = inferAssetAndInstallationFromText(result.text);
+        if (inferred.asset && inferred.asset !== 'Duliajan Production Station') {
+          setAsset(inferred.asset);
+        }
+        if (inferred.installation) {
+          setInstallation(inferred.installation);
+        }
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to extract text from file.');
@@ -93,7 +103,7 @@ export const ReportUploadModal: React.FC<ReportUploadModalProps> = ({ isOpen, on
     }
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!extractedText.trim()) {
       setErrorMessage('Please provide report narrative text before analyzing.');
       return;
@@ -101,35 +111,47 @@ export const ReportUploadModal: React.FC<ReportUploadModalProps> = ({ isOpen, on
 
     setIsAnalyzing(true);
 
-    setTimeout(() => {
-      try {
-        const analyzed = analyzeReportNarrative(extractedText, {
-          installation,
-          asset,
-          reportType
-        });
+    try {
+      const analyzed = await analyzeReportNarrativeAsync(extractedText, {
+        installation,
+        asset,
+        reportType
+      });
 
-        if (file) {
-          analyzed.extractedFrom = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-        } else {
-          analyzed.extractedFrom = 'Manual / Pasted Input';
-        }
-
-        addReport(analyzed);
-        selectReport(analyzed.id);
-        setIsAnalyzing(false);
-        onClose();
-        setActiveTab('report-analyzer');
-      } catch (err: any) {
-        setErrorMessage(`Analysis error: ${err.message}`);
-        setIsAnalyzing(false);
+      if (file) {
+        analyzed.extractedFrom = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      } else {
+        analyzed.extractedFrom = 'Manual / Pasted Input';
       }
-    }, 600);
+
+      addReport(analyzed);
+      selectReport(analyzed.id);
+      setIsAnalyzing(false);
+      onClose();
+      setActiveTab('report-analyzer');
+    } catch (err: any) {
+      setErrorMessage(`Analysis error: ${err.message}`);
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleTextChange = (newText: string) => {
+    setExtractedText(newText);
+    if (!assetManuallyModified && newText.trim().length > 15) {
+      const inferred = inferAssetAndInstallationFromText(newText);
+      if (inferred.asset && inferred.asset !== 'Duliajan Production Station') {
+        setAsset(inferred.asset);
+      }
+      if (inferred.installation) {
+        setInstallation(inferred.installation);
+      }
+    }
   };
 
   const handleApplyPreset = (preset: typeof SAMPLE_PRESETS[0]) => {
     setInstallation(preset.installation);
     setAsset(preset.asset);
+    setAssetManuallyModified(true);
     setExtractedText(preset.text);
     setFile(null);
     setExtractionResult({
@@ -279,7 +301,7 @@ export const ReportUploadModal: React.FC<ReportUploadModalProps> = ({ isOpen, on
               </label>
               <textarea
                 value={extractedText}
-                onChange={(e) => setExtractedText(e.target.value)}
+                onChange={(e) => handleTextChange(e.target.value)}
                 placeholder="Type or paste the actual incident or near-miss observation text here..."
                 rows={5}
                 className="w-full text-xs font-mono p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-oil-500 focus:border-oil-500 outline-none"
@@ -320,7 +342,7 @@ export const ReportUploadModal: React.FC<ReportUploadModalProps> = ({ isOpen, on
               </div>
               <textarea
                 value={extractedText}
-                onChange={(e) => setExtractedText(e.target.value)}
+                onChange={(e) => handleTextChange(e.target.value)}
                 rows={6}
                 className="w-full text-xs font-mono p-3 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-oil-500 outline-none transition-all"
               />
@@ -352,7 +374,10 @@ export const ReportUploadModal: React.FC<ReportUploadModalProps> = ({ isOpen, on
               <input
                 type="text"
                 value={asset}
-                onChange={(e) => setAsset(e.target.value)}
+                onChange={(e) => {
+                  setAsset(e.target.value);
+                  setAssetManuallyModified(true);
+                }}
                 placeholder="e.g. Workover Rig WOR-07"
                 className="w-full text-xs p-2 border border-slate-300 rounded-md bg-white focus:ring-1 focus:ring-oil-500 outline-none"
               />

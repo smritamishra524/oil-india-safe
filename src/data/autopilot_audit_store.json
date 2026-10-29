@@ -1,5 +1,19 @@
 [
   {
+    "id": "AP-AUD-1793290868303",
+    "timestamp": "2026-10-29T16:21:08.303Z",
+    "prompt": "Identify SIF precursor evidence from report, formulate corrective mitigation, and dispatch verified work order to OIL CMMS.",
+    "reportId": "OIL-ML-3976",
+    "actionTitle": "Immediately isolate process line, secure perimeter, and restrict ignition sources.",
+    "targetApp": "OIL SAP-PM Safety Task Dispatcher & CMMS Portal",
+    "stepsCount": 6,
+    "approvedBy": "R. K. Barua",
+    "status": "Completed and verified",
+    "dispatchedTaskId": "OIL-WO-2026-5720",
+    "verificationEvidence": "Token: VTOK-44b8f0f96cdc45d8 • Verification Endpoint: /api/cmms/verify/OIL-WO-2026-5720",
+    "executionDurationMs": 3
+  },
+  {
     "id": "AP-AUD-1792939448093",
     "timestamp": "2026-10-25T14:44:08.093Z",
     "prompt": "Identify SIF precursor evidence from report, formulate corrective mitigation, and dispatch verified work order to OIL CMMS.",

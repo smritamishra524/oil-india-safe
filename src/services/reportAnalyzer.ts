@@ -19,6 +19,7 @@ import {
   SIFPathwayNode,
   BarrierDegradationDetail
 } from '../types';
+import { analyzeReportWithML } from './mlClient';
 
 interface PatternRule<T> {
   type: T;
@@ -141,9 +142,9 @@ const HAZARD_PATTERNS: PatternRule<HazardType>[] = [
   },
   {
     type: 'Ignition Source in Hazardous Zone',
-    keywords: ['spark', 'hot surface', 'unrated electrical', 'static', 'flame', 'non-intrinsically safe', 'smoking', 'ex zone 1', 'hot work permit'],
-    patterns: [/ignition\s+source/i, /zone\s+[01]/i, /hot\s+surface\s+near\s+leak/i, /sparking/i],
-    weight: 13
+    keywords: ['spark', 'hot surface', 'unrated electrical', 'static', 'flame', 'non-intrinsically safe', 'smoking', 'ex zone 1', 'hot work permit', 'furnace', 'fired heater', 'burner', 'boiler', 'firebox', 'deflagration', 'backfire', 'combustion chamber'],
+    patterns: [/ignition\s+source/i, /zone\s+[01]/i, /hot\s+surface\s+near\s+leak/i, /sparking/i, /furnace\s+(?:explosion|fire|deflagration|door)/i, /burner\s+(?:lighting|flameout|relight)/i, /fired\s+heater/i],
+    weight: 15
   },
   {
     type: 'Structural Instability',
@@ -203,6 +204,88 @@ const BARRIER_PATTERNS: PatternRule<BarrierType>[] = [
     weight: 12
   }
 ];
+
+/**
+ * Intelligently extracts the true asset and installation from narrative text,
+ * preventing cross-report contamination or stale defaults (e.g. Workover Rig WOR-07 on a furnace report).
+ */
+export function inferAssetAndInstallationFromText(
+  text: string,
+  providedAsset?: string,
+  providedInstallation?: string
+): { asset: string; installation: string; activityHint?: ActivityType } {
+  const textLower = (text || '').toLowerCase();
+  const isDefaultOrEmpty = !providedAsset || (providedAsset === 'Workover Rig WOR-07' && !/wor-07|wor|workover|tubing|cellar|wellhead/i.test(textLower));
+
+  if (!isDefaultOrEmpty && providedAsset) {
+    return {
+      asset: providedAsset,
+      installation: providedInstallation || 'Duliajan Central Field'
+    };
+  }
+
+  if (/furnace|fired heater|reboiler|firebox|burner|boiler|combustion chamber/i.test(textLower)) {
+    return {
+      asset: 'Process Fired Furnace / Heater H-101',
+      installation: 'Digboi Refinery Area & Fields',
+      activityHint: 'Production Operations'
+    };
+  }
+  if (/monkey board|derrick|mast|racking|28 meters|22 meters|drill collar/i.test(textLower)) {
+    return {
+      asset: 'Jorhat Exploration Rig 4',
+      installation: 'Jorhat Exploration Rig 4',
+      activityHint: 'Work at Height'
+    };
+  }
+  if (/separator|v-201|vessel cleanout|knockout drum|slug catcher/i.test(textLower)) {
+    return {
+      asset: 'High-Pressure 3-Phase Test Separator V-201',
+      installation: 'Bagjan Wellsite Operations',
+      activityHint: 'Production Operations'
+    };
+  }
+  if (/trunkline|pipeline|flowline|pig launcher|pigging/i.test(textLower)) {
+    return {
+      asset: 'Crude Pipeline Trunk-A',
+      installation: 'Moran Oil Field',
+      activityHint: 'Pipeline Maintenance'
+    };
+  }
+  if (/crane|lifting sling|shackle|suspended load|tagline/i.test(textLower)) {
+    return {
+      asset: 'Mobile Crane MC-05 / Heavy Rigging Unit',
+      installation: 'Duliajan Central Field',
+      activityHint: 'Mechanical Lifting'
+    };
+  }
+  if (/compressor|c-2|gas booster|gas lift/i.test(textLower)) {
+    return {
+      asset: 'Booster Compressor Skid C-2',
+      installation: 'Duliajan Central Field',
+      activityHint: 'Production Operations'
+    };
+  }
+  if (/storage tank|tank t-|thief hatch/i.test(textLower)) {
+    return {
+      asset: 'Crude Storage Tank T-102',
+      installation: 'Moran Oil Field',
+      activityHint: 'General Maintenance'
+    };
+  }
+  if (/workover|wor-07|tubing|cellar|wellhead/i.test(textLower)) {
+    return {
+      asset: 'Workover Rig WOR-07',
+      installation: 'Duliajan Central Field',
+      activityHint: 'Workover'
+    };
+  }
+
+  return {
+    asset: providedAsset || 'Duliajan Production Station',
+    installation: providedInstallation || 'Duliajan Central Field'
+  };
+}
 
 export function analyzeReportNarrative(
   text: string, 
@@ -762,15 +845,12 @@ export function analyzeReportNarrative(
   const reportId = `OIL-REP-${new Date().getFullYear()}-${randomSuffix}`;
   const currentDate = new Date().toISOString().split('T')[0];
 
-  const assetName = existingMetadata?.asset || 
-    (matchedActivity === 'Work at Height' ? 'Jorhat Exploration Rig 4' :
-     matchedActivity === 'Workover' ? 'Workover Rig WOR-07' :
-     matchedActivity === 'Pipeline Maintenance' ? 'Crude Pipeline Trunk-A' :
-     'Duliajan Production Station');
-
-  const installationName = existingMetadata?.installation || 
-    (matchedActivity === 'Work at Height' ? 'Jorhat Exploration Rig 4' :
-     'Duliajan Central Field');
+  const inferred = inferAssetAndInstallationFromText(text, existingMetadata?.asset, existingMetadata?.installation);
+  const assetName = inferred.asset;
+  const installationName = inferred.installation;
+  if (inferred.activityHint && matchedActivity === 'General Maintenance') {
+    matchedActivity = inferred.activityHint;
+  }
 
   return {
     id: reportId,
@@ -840,3 +920,73 @@ export function enrichReportWithIntelligence(report: SafetyReport, allReports?: 
     barrierDegradationDetails: report.barrierDegradationDetails || analyzed.barrierDegradationDetails
   };
 }
+
+/**
+ * Asynchronous report narrative analyzer that invokes the real trained ML microservice.
+ * Integrates ML predictions with Incident DNA, SIF Pathway, Weak Signal Fusion,
+ * Barrier Degradation Intelligence, Action Planning, and Prevent Recurrence features.
+ */
+export async function analyzeReportNarrativeAsync(
+  text: string,
+  existingMetadata?: { installation?: string; asset?: string; reportType?: string },
+  historicalReports?: SafetyReport[]
+): Promise<SafetyReport> {
+  const mlResult = await analyzeReportWithML(text, existingMetadata);
+
+  if (mlResult && mlResult.hazard) {
+    // Generate base report using deterministic structure as scaffold
+    const baseReport = analyzeReportNarrative(text, existingMetadata, historicalReports);
+
+    // Override with real ML predictions, evidence, confidence, and uncertainty flags
+    return {
+      ...baseReport,
+      id: mlResult.id || baseReport.id,
+      asset: mlResult.asset || baseReport.asset,
+      installation: mlResult.installation || baseReport.installation,
+      activity: (mlResult.activity as any) || baseReport.activity,
+      hazard: mlResult.hazard,
+      sifPrecursor: mlResult.sifPrecursor || baseReport.sifPrecursor,
+      reportType: mlResult.reportType || baseReport.reportType,
+      sifPotential: mlResult.sifPotential || baseReport.sifPotential,
+      severity: mlResult.severity || baseReport.severity,
+      barrier: mlResult.barrier || baseReport.barrier,
+      exposure: mlResult.exposure || baseReport.exposure,
+      controlFailure: mlResult.controlFailure || baseReport.controlFailure,
+      iogpRule: mlResult.iogpRule || baseReport.iogpRule,
+      confidence: mlResult.confidence,
+      riskScore: mlResult.riskScore,
+      evidence: mlResult.evidence && mlResult.evidence.length > 0 ? mlResult.evidence : baseReport.evidence,
+      reviewNeeded: mlResult.reviewNeeded,
+      uncertaintyReason: mlResult.uncertaintyReason || undefined,
+      probabilities: mlResult.probabilities,
+      modelVersion: mlResult.modelVersion,
+      isMlGenerated: true,
+      validation: {
+        status: 'AI Suggested',
+        notes: `Analyzed via Real ML Model ${mlResult.modelVersion} (Confidence: ${mlResult.confidence}%)`
+      },
+      // Re-link DNA and recommendations with the ML predicted barrier and hazard
+      dna: {
+        ...baseReport.dna,
+        hazard: mlResult.hazard,
+        barrier: mlResult.barrier || baseReport.barrier,
+        controlFailure: mlResult.controlFailure || baseReport.controlFailure,
+        sifPrecursor: mlResult.sifPrecursor || baseReport.sifPrecursor,
+        iogpRule: mlResult.iogpRule || baseReport.iogpRule
+      },
+      recommendedIntervention: {
+        ...baseReport.recommendedIntervention,
+        barrierReinforced: mlResult.barrier || baseReport.barrier
+      }
+    };
+  }
+
+  // Graceful fallback to deterministic pattern analyzer if ML backend is offline
+  const fallback = analyzeReportNarrative(text, existingMetadata, historicalReports);
+  fallback.validation = {
+    status: 'AI Suggested',
+    notes: 'Rule-based analysis (ML Service Offline)'
+  };
+  return fallback;
+}
+

@@ -1,6 +1,25 @@
 {
   "tasks": [
     {
+      "id": "OIL-WO-2026-5720",
+      "title": "Immediately isolate process line, secure perimeter, and restrict ignition sources.",
+      "installation": "Duliajan Central Field",
+      "asset": "Workover Rig WOR-07",
+      "hazardType": "Stored / Residual Energy",
+      "precursorDna": "Energy Isolation Failure",
+      "barrierAddressed": "Energy Isolation (LOTO)",
+      "description": "Supervisory safety mitigation: Immediately isolate process line, secure perimeter, and restrict ignition sources.. Mandatory zero-energy verification prior to permitting crew entry into hazardous zone.",
+      "owner": "Area Production In-Charge & Instrumentation Lead",
+      "priority": "High",
+      "targetDate": "2026-11-01",
+      "verificationMethod": "HSE and Area In-Charge dual witness test for Gas Detection & Monitoring.",
+      "status": "DISPATCHED",
+      "createdAt": "2026-10-29T16:21:08.301Z",
+      "dispatchedBy": "SAFE-X Autopilot (Approved by R. K. Barua)",
+      "verificationToken": "VTOK-44b8f0f96cdc45d8",
+      "verifiedAt": null
+    },
+    {
       "id": "OIL-WO-2026-4115",
       "title": "Halt mechanical unbolting and secure danger zone around pressurized valve assembly.",
       "installation": "Duliajan Central Field",

@@ -179,6 +179,12 @@ and require qualified HSE validation. Not deterministic accident prediction.
                   Real File Extracted
                 </span>
               )}
+              {selectedReport.isMlGenerated && (
+                <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5" />
+                  ML Model {selectedReport.modelVersion || 'v1.0.0'}
+                </span>
+              )}
             </div>
             <h1 className="text-base font-bold text-slate-900 truncate max-w-lg">
               {selectedReport.sifPrecursor} on {selectedReport.asset}
@@ -218,6 +224,24 @@ and require qualified HSE validation. Not deterministic accident prediction.
           </button>
         </div>
       </div>
+
+      {/* Uncertainty & Manual Review Alert Banner */}
+      {selectedReport.reviewNeeded && (
+        <div className="bg-amber-50 border border-amber-300 rounded-xl p-3.5 shadow-sm flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="text-xs text-amber-900 space-y-0.5">
+            <div className="font-bold text-amber-950 flex items-center gap-1.5">
+              <span>HSE Specialist Review Required</span>
+              <span className="px-1.5 py-0.2 bg-amber-200 text-amber-900 text-[10px] rounded font-semibold uppercase">
+                Uncertainty Flag
+              </span>
+            </div>
+            <p className="text-amber-800 leading-normal">
+              {selectedReport.uncertaintyReason || 'Model prediction confidence is below the operational reliability threshold or the report input requires manual safety verification.'}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Main Analysis Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -455,9 +479,14 @@ and require qualified HSE validation. Not deterministic accident prediction.
           
           {/* Risk Card */}
           <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-              SIF Risk Quantification
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                SIF Risk Quantification
+              </span>
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
+                Index Scale: 0–100
+              </span>
+            </div>
 
             {/* Risk Gauge */}
             <div className="text-center py-4 border-b border-slate-100">
@@ -468,9 +497,30 @@ and require qualified HSE validation. Not deterministic accident prediction.
               <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wide bg-rose-100 text-rose-800 border border-rose-200">
                 {selectedReport.sifPotential}
               </div>
-              <p className="text-xs text-slate-500 mt-2">
-                Severity: <span className="font-semibold text-slate-800">{selectedReport.severity}</span> • Model Confidence: <span className="font-semibold text-slate-800">{selectedReport.confidence}%</span>
+              <p className="text-[11px] text-slate-400 mt-1 italic">
+                Engineering Risk Consequence Index (non-probabilistic composite)
               </p>
+              
+              <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-left text-xs">
+                <div className="p-2 bg-slate-50 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase block">Severity Level</span>
+                  <span className="font-bold text-slate-800">{selectedReport.severity}</span>
+                </div>
+                <div className="p-2 bg-slate-50 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase block">Calibrated Confidence</span>
+                  <span className="font-bold text-emerald-700">{selectedReport.confidence}% posterior</span>
+                </div>
+              </div>
+
+              {/* Intelligence Source Indicator */}
+              <div className="mt-2 text-left">
+                <div className="text-[10px] text-slate-500 font-medium flex items-center justify-between">
+                  <span>Intelligence Pipeline:</span>
+                  <span className={`font-semibold ${selectedReport.isMlGenerated ? 'text-emerald-700' : 'text-blue-700'}`}>
+                    {selectedReport.isMlGenerated ? 'Real ML Microservice (v1.0.0)' : 'Deterministic Rules & Evidence'}
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Quick Connected Intelligence Links */}

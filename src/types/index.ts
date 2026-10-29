@@ -231,6 +231,13 @@ export interface SafetyReport {
   weakSignals: WeakSignalItem[];
   sifPathway: SIFPathwayNode[];
   barrierDegradationDetails: BarrierDegradationDetail;
+
+  // Real ML Model & Uncertainty Layer Fields
+  isMlGenerated?: boolean;
+  modelVersion?: string;
+  reviewNeeded?: boolean;
+  uncertaintyReason?: string;
+  probabilities?: Record<string, Record<string, number>>;
 }
 
 export interface CorrectiveAction {

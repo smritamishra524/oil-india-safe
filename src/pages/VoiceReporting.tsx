@@ -16,7 +16,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { analyzeReportNarrative } from '../services/reportAnalyzer';
+import { analyzeReportNarrative, analyzeReportNarrativeAsync } from '../services/reportAnalyzer';
 
 export const VoiceReporting: React.FC = () => {
   const { addReport, selectReport, setActiveTab } = useApp();
@@ -221,13 +221,13 @@ export const VoiceReporting: React.FC = () => {
     }
   };
 
-  const handleAnalyzeVoice = () => {
+  const handleAnalyzeVoice = async () => {
     if (!transcript.trim()) return;
 
     setIsProcessing(true);
 
-    setTimeout(() => {
-      const analyzed = analyzeReportNarrative(transcript, {
+    try {
+      const analyzed = await analyzeReportNarrativeAsync(transcript, {
         installation: 'Duliajan Central Field',
         asset: 'Frontline Audio Ingestion',
         reportType: 'Near Miss'
@@ -240,7 +240,9 @@ export const VoiceReporting: React.FC = () => {
       addReport(analyzed);
       selectReport(analyzed.id);
       setIsProcessing(false);
-    }, 400);
+    } catch (err) {
+      setIsProcessing(false);
+    }
   };
 
   const handleGoToAnalyzer = () => {

@@ -33,6 +33,12 @@
       "userId": "usr-oil-001",
       "createdAt": "2026-09-17T17:13:52.040Z",
       "expiresAt": "2026-09-24T17:13:52.040Z"
+    },
+    {
+      "token": "6f8e8e672eaf8bcfe577d3664c5e4c8641ad8145978fc74dbc50d1b89a14d8a5",
+      "userId": "usr-oil-001",
+      "createdAt": "2026-10-29T16:19:23.635Z",
+      "expiresAt": "2026-11-05T16:19:23.635Z"
     }
   ],
   "resetTokens": {}

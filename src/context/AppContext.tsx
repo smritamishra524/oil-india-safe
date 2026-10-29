@@ -21,7 +21,7 @@ import {
 } from '../data/reports';
 
 import { authService, AuthUser } from '../services/authService';
-import { enrichReportWithIntelligence } from '../services/reportAnalyzer';
+import { enrichReportWithIntelligence, inferAssetAndInstallationFromText } from '../services/reportAnalyzer';
 
 export interface AppNotification {
   id: string;
@@ -93,7 +93,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem(STORAGE_KEYS.REPORTS);
       if (saved) {
         const parsed: SafetyReport[] = JSON.parse(saved);
-        return parsed.map(r => enrichReportWithIntelligence(r, parsed));
+        const sanitized = parsed.map(r => {
+          if (r.asset === 'Workover Rig WOR-07' && /furnace|fired heater|firebox|burner|boiler|combustion/i.test(r.narrative)) {
+            const inferred = inferAssetAndInstallationFromText(r.narrative);
+            return {
+              ...r,
+              asset: inferred.asset,
+              installation: inferred.installation,
+              hazard: (r.hazard === 'Stored / Residual Energy' ? 'Ignition Source in Hazardous Zone' : r.hazard) as any,
+              sifPrecursor: (r.sifPrecursor === 'Energy Isolation Failure' ? 'Hot Work Ignition Precursor' : r.sifPrecursor) as any
+            };
+          }
+          return r;
+        });
+        return sanitized.map(r => enrichReportWithIntelligence(r, sanitized));
       }
     } catch (e) {
       console.error(e);

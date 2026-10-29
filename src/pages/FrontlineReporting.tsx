@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Send, CheckCircle2, AlertTriangle, ArrowRight, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { analyzeReportNarrative } from '../services/reportAnalyzer';
+import { analyzeReportNarrative, analyzeReportNarrativeAsync } from '../services/reportAnalyzer';
 
 export const FrontlineReporting: React.FC = () => {
   const { addReport, selectReport, setActiveTab } = useApp();
@@ -15,15 +15,15 @@ export const FrontlineReporting: React.FC = () => {
   const [languageOption, setLanguageOption] = useState('English');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!narrative.trim()) return;
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
       const fullText = `${narrative}. Immediate Action Taken: ${immediateAction || 'None reported'}.`;
-      const analyzed = analyzeReportNarrative(fullText, {
+      const analyzed = await analyzeReportNarrativeAsync(fullText, {
         installation,
         asset,
         reportType: 'Unsafe Condition'
@@ -36,7 +36,9 @@ export const FrontlineReporting: React.FC = () => {
       selectReport(analyzed.id);
       setIsSubmitting(false);
       setActiveTab('report-analyzer');
-    }, 500);
+    } catch (err) {
+      setIsSubmitting(false);
+    }
   };
 
   return (

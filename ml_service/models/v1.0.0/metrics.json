@@ -1,0 +1,709 @@
+{
+  "version": "v1.0.0",
+  "trained_at": "2026-10-29T16:35:27.923504Z",
+  "dataset_total": 165,
+  "train_samples": 132,
+  "test_samples": 33,
+  "targets": {
+    "hazard": {
+      "accuracy": 0.4242,
+      "macro_f1": 0.3976,
+      "weighted_f1": 0.4062,
+      "macro_precision": 0.4269,
+      "macro_recall": 0.4167,
+      "classes": [
+        "Dropped Object",
+        "Fall from Height",
+        "High Pressure Fluid",
+        "Hydrocarbon Gas Release",
+        "Hydrogen Sulfide (H2S)",
+        "Ignition Source in Hazardous Zone",
+        "Line of Fire (Machinery/Tension)",
+        "Oxygen Deficiency / Toxic Fumes",
+        "Stored / Residual Energy",
+        "Structural Instability"
+      ],
+      "classification_report": {
+        "Dropped Object": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 3.0
+        },
+        "Fall from Height": {
+          "precision": 0.2857142857142857,
+          "recall": 0.5,
+          "f1-score": 0.36363636363636365,
+          "support": 4.0
+        },
+        "High Pressure Fluid": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 3.0
+        },
+        "Hydrocarbon Gas Release": {
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1-score": 0.6666666666666666,
+          "support": 4.0
+        },
+        "Hydrogen Sulfide (H2S)": {
+          "precision": 0.5,
+          "recall": 0.6666666666666666,
+          "f1-score": 0.5714285714285714,
+          "support": 3.0
+        },
+        "Ignition Source in Hazardous Zone": {
+          "precision": 0.4,
+          "recall": 0.5,
+          "f1-score": 0.4444444444444444,
+          "support": 4.0
+        },
+        "Line of Fire (Machinery/Tension)": {
+          "precision": 0.25,
+          "recall": 0.3333333333333333,
+          "f1-score": 0.2857142857142857,
+          "support": 3.0
+        },
+        "Oxygen Deficiency / Toxic Fumes": {
+          "precision": 0.5,
+          "recall": 0.3333333333333333,
+          "f1-score": 0.4,
+          "support": 3.0
+        },
+        "Stored / Residual Energy": {
+          "precision": 0.3333333333333333,
+          "recall": 0.6666666666666666,
+          "f1-score": 0.4444444444444444,
+          "support": 3.0
+        },
+        "Structural Instability": {
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "f1-score": 0.8,
+          "support": 3.0
+        },
+        "accuracy": 0.42424242424242425,
+        "macro avg": {
+          "precision": 0.4269047619047619,
+          "recall": 0.41666666666666663,
+          "f1-score": 0.39763347763347767,
+          "support": 33.0
+        },
+        "weighted avg": {
+          "precision": 0.43917748917748917,
+          "recall": 0.42424242424242425,
+          "f1-score": 0.40617429708338804,
+          "support": 33.0
+        }
+      },
+      "top_features": {
+        "Dropped Object": [
+          "crane",
+          "overhead",
+          "derrick",
+          "ton",
+          "lifted",
+          "fell",
+          "webbing",
+          "directly",
+          "skid",
+          "attached"
+        ],
+        "Fall from Height": [
+          "meters",
+          "harness",
+          "ladder",
+          "grating",
+          "unhooked",
+          "slip",
+          "safety",
+          "chain",
+          "inertia",
+          "derrickman"
+        ],
+        "High Pressure Fluid": [
+          "pressure",
+          "psi",
+          "test",
+          "high pressure",
+          "pressure test",
+          "water",
+          "pump",
+          "pipe",
+          "union",
+          "washdown"
+        ],
+        "Hydrocarbon Gas Release": [
+          "gas",
+          "condensate",
+          "vent",
+          "header",
+          "lel",
+          "level",
+          "hydrocarbon",
+          "near",
+          "scrubber",
+          "droplets"
+        ],
+        "Hydrogen Sulfide (H2S)": [
+          "h2s",
+          "sour",
+          "detector",
+          "sensor",
+          "breathing",
+          "ppm",
+          "fixed",
+          "personal",
+          "crew",
+          "windsock"
+        ],
+        "Ignition Source in Hazardous Zone": [
+          "furnace",
+          "sparks",
+          "work",
+          "zone",
+          "burner",
+          "watch",
+          "grinding",
+          "hot",
+          "hot work",
+          "engine"
+        ],
+        "Line of Fire (Machinery/Tension)": [
+          "guard",
+          "tension",
+          "running",
+          "moved",
+          "drive",
+          "cable",
+          "winch",
+          "pipeline",
+          "pull",
+          "forklift"
+        ],
+        "Oxygen Deficiency / Toxic Fumes": [
+          "confined space",
+          "space",
+          "confined",
+          "gas test",
+          "entry",
+          "air",
+          "ventilation",
+          "inside",
+          "rescue",
+          "tripod"
+        ],
+        "Stored / Residual Energy": [
+          "line",
+          "valve",
+          "pressure",
+          "pneumatic",
+          "zero",
+          "psi",
+          "filter",
+          "transfer line",
+          "trapped",
+          "released"
+        ],
+        "Structural Instability": [
+          "mast",
+          "load",
+          "50",
+          "outrigger",
+          "base",
+          "vibration",
+          "structural",
+          "steel",
+          "sub",
+          "beneath"
+        ]
+      }
+    },
+    "report_type": {
+      "accuracy": 0.3636,
+      "macro_f1": 0.3328,
+      "weighted_f1": 0.3482,
+      "macro_precision": 0.4188,
+      "macro_recall": 0.3542,
+      "classes": [
+        "Incident Precursor",
+        "Near Miss",
+        "Unsafe Act",
+        "Unsafe Condition"
+      ],
+      "classification_report": {
+        "Incident Precursor": {
+          "precision": 0.5,
+          "recall": 0.16666666666666666,
+          "f1-score": 0.25,
+          "support": 6.0
+        },
+        "Near Miss": {
+          "precision": 0.2222222222222222,
+          "recall": 0.3333333333333333,
+          "f1-score": 0.26666666666666666,
+          "support": 6.0
+        },
+        "Unsafe Act": {
+          "precision": 0.6,
+          "recall": 0.25,
+          "f1-score": 0.35294117647058826,
+          "support": 12.0
+        },
+        "Unsafe Condition": {
+          "precision": 0.35294117647058826,
+          "recall": 0.6666666666666666,
+          "f1-score": 0.46153846153846156,
+          "support": 9.0
+        },
+        "accuracy": 0.36363636363636365,
+        "macro avg": {
+          "precision": 0.4187908496732026,
+          "recall": 0.35416666666666663,
+          "f1-score": 0.33278657616892915,
+          "support": 33.0
+        },
+        "weighted avg": {
+          "precision": 0.445751633986928,
+          "recall": 0.36363636363636365,
+          "f1-score": 0.34815576580282465,
+          "support": 33.0
+        }
+      },
+      "top_features": {
+        "Incident Precursor": [
+          "high",
+          "ejected",
+          "line",
+          "severe",
+          "suction",
+          "vibration",
+          "concentration",
+          "stripped",
+          "threads stripped",
+          "threads"
+        ],
+        "Near Miss": [
+          "caught",
+          "operator",
+          "pump",
+          "stepped",
+          "wrench",
+          "flange",
+          "handrail",
+          "forklift",
+          "water",
+          "alley"
+        ],
+        "Unsafe Act": [
+          "technician",
+          "contractor",
+          "manual",
+          "gas test",
+          "entered",
+          "entry",
+          "permit",
+          "using",
+          "personal",
+          "webbing"
+        ],
+        "Unsafe Condition": [
+          "missing",
+          "perimeter",
+          "tank",
+          "loose",
+          "block",
+          "chain",
+          "floor",
+          "safety",
+          "corroded",
+          "ground"
+        ]
+      }
+    },
+    "sif_potential": {
+      "accuracy": 0.3939,
+      "macro_f1": 0.3139,
+      "weighted_f1": 0.3944,
+      "macro_precision": 0.3162,
+      "macro_recall": 0.3167,
+      "classes": [
+        "Non-SIF Precursor",
+        "Potential SIF",
+        "SIF-Capable"
+      ],
+      "classification_report": {
+        "Non-SIF Precursor": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 6.0
+        },
+        "Potential SIF": {
+          "precision": 0.3333333333333333,
+          "recall": 0.4166666666666667,
+          "f1-score": 0.37037037037037035,
+          "support": 12.0
+        },
+        "SIF-Capable": {
+          "precision": 0.6153846153846154,
+          "recall": 0.5333333333333333,
+          "f1-score": 0.5714285714285714,
+          "support": 15.0
+        },
+        "accuracy": 0.3939393939393939,
+        "macro avg": {
+          "precision": 0.3162393162393162,
+          "recall": 0.31666666666666665,
+          "f1-score": 0.31393298059964725,
+          "support": 33.0
+        },
+        "weighted avg": {
+          "precision": 0.40093240093240096,
+          "recall": 0.3939393939393939,
+          "f1-score": 0.3944203944203944,
+          "support": 33.0
+        }
+      },
+      "top_features": {
+        "Non-SIF Precursor": [
+          "hose",
+          "air",
+          "pneumatic",
+          "loose",
+          "fitting",
+          "staircase",
+          "ground",
+          "kinked",
+          "workshop",
+          "slip"
+        ],
+        "Potential SIF": [
+          "steel",
+          "corroded",
+          "load",
+          "used",
+          "hoist",
+          "overhead",
+          "barricade",
+          "operator",
+          "yard",
+          "open"
+        ],
+        "SIF-Capable": [
+          "high",
+          "crane",
+          "line",
+          "ton",
+          "cellar",
+          "meters",
+          "mast",
+          "severe",
+          "process",
+          "caught"
+        ]
+      }
+    },
+    "severity": {
+      "accuracy": 0.3333,
+      "macro_f1": 0.2714,
+      "weighted_f1": 0.31,
+      "macro_precision": 0.3151,
+      "macro_recall": 0.2773,
+      "classes": [
+        "Critical",
+        "High",
+        "Low",
+        "Medium"
+      ],
+      "classification_report": {
+        "Critical": {
+          "precision": 0.4444444444444444,
+          "recall": 0.36363636363636365,
+          "f1-score": 0.4,
+          "support": 11.0
+        },
+        "High": {
+          "precision": 0.3157894736842105,
+          "recall": 0.5454545454545454,
+          "f1-score": 0.4,
+          "support": 11.0
+        },
+        "Low": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 6.0
+        },
+        "Medium": {
+          "precision": 0.5,
+          "recall": 0.2,
+          "f1-score": 0.2857142857142857,
+          "support": 5.0
+        },
+        "accuracy": 0.3333333333333333,
+        "macro avg": {
+          "precision": 0.3150584795321637,
+          "recall": 0.2772727272727273,
+          "f1-score": 0.27142857142857146,
+          "support": 33.0
+        },
+        "weighted avg": {
+          "precision": 0.3291688818004607,
+          "recall": 0.3333333333333333,
+          "f1-score": 0.30995670995671,
+          "support": 33.0
+        }
+      },
+      "top_features": {
+        "Critical": [
+          "line",
+          "high",
+          "mast",
+          "rig",
+          "crane",
+          "ejected",
+          "derrick",
+          "furnace",
+          "away",
+          "sledgehammer"
+        ],
+        "High": [
+          "open",
+          "caught",
+          "sling",
+          "edge",
+          "cable",
+          "steel",
+          "direction",
+          "leg",
+          "tree",
+          "operator"
+        ],
+        "Low": [
+          "hose",
+          "fitting",
+          "air",
+          "staircase",
+          "ground",
+          "water",
+          "workshop",
+          "access",
+          "small",
+          "filter"
+        ],
+        "Medium": [
+          "contractor",
+          "hoist",
+          "gauge",
+          "perimeter",
+          "concrete",
+          "entry",
+          "needle",
+          "droplets",
+          "gauge needle",
+          "20"
+        ]
+      }
+    },
+    "sif_precursor": {
+      "accuracy": 0.4848,
+      "macro_f1": 0.4264,
+      "weighted_f1": 0.4567,
+      "macro_precision": 0.4413,
+      "macro_recall": 0.4537,
+      "classes": [
+        "Confined Space Engulfment",
+        "Energy Isolation Failure",
+        "Failed Fall Protection",
+        "Heavy Equipment Blind Zone",
+        "High-Pressure Blowout / Ejection",
+        "Hot Work Ignition Precursor",
+        "Suspended Load Rigging Failure",
+        "Toxic Atmosphere Exposure",
+        "Uncontained Hydrocarbon Leakage"
+      ],
+      "classification_report": {
+        "Confined Space Engulfment": {
+          "precision": 0.5,
+          "recall": 0.3333333333333333,
+          "f1-score": 0.4,
+          "support": 3.0
+        },
+        "Energy Isolation Failure": {
+          "precision": 0.3333333333333333,
+          "recall": 0.6666666666666666,
+          "f1-score": 0.4444444444444444,
+          "support": 3.0
+        },
+        "Failed Fall Protection": {
+          "precision": 0.5,
+          "recall": 0.75,
+          "f1-score": 0.6,
+          "support": 4.0
+        },
+        "Heavy Equipment Blind Zone": {
+          "precision": 0.5714285714285714,
+          "recall": 0.6666666666666666,
+          "f1-score": 0.6153846153846154,
+          "support": 6.0
+        },
+        "High-Pressure Blowout / Ejection": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 3.0
+        },
+        "Hot Work Ignition Precursor": {
+          "precision": 0.4,
+          "recall": 0.5,
+          "f1-score": 0.4444444444444444,
+          "support": 4.0
+        },
+        "Suspended Load Rigging Failure": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 3.0
+        },
+        "Toxic Atmosphere Exposure": {
+          "precision": 0.6666666666666666,
+          "recall": 0.6666666666666666,
+          "f1-score": 0.6666666666666666,
+          "support": 3.0
+        },
+        "Uncontained Hydrocarbon Leakage": {
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1-score": 0.6666666666666666,
+          "support": 4.0
+        },
+        "accuracy": 0.48484848484848486,
+        "macro avg": {
+          "precision": 0.44126984126984126,
+          "recall": 0.45370370370370366,
+          "f1-score": 0.4264007597340931,
+          "support": 33.0
+        },
+        "weighted avg": {
+          "precision": 0.47056277056277057,
+          "recall": 0.48484848484848486,
+          "f1-score": 0.4566692566692566,
+          "support": 33.0
+        }
+      },
+      "top_features": {
+        "Confined Space Engulfment": [
+          "confined",
+          "space",
+          "confined space",
+          "gas test",
+          "entry",
+          "air",
+          "ventilation",
+          "inside",
+          "oxygen",
+          "nitrogen"
+        ],
+        "Energy Isolation Failure": [
+          "line",
+          "valve",
+          "pressure",
+          "pneumatic",
+          "zero",
+          "filter",
+          "transfer line",
+          "psi",
+          "trapped",
+          "spray"
+        ],
+        "Failed Fall Protection": [
+          "meters",
+          "harness",
+          "handrail",
+          "ladder",
+          "grating",
+          "tie",
+          "platform",
+          "staircase",
+          "unhooked",
+          "slip"
+        ],
+        "Heavy Equipment Blind Zone": [
+          "tension",
+          "guard",
+          "mast",
+          "pull",
+          "forklift",
+          "steel",
+          "50",
+          "running",
+          "moved",
+          "drive"
+        ],
+        "High-Pressure Blowout / Ejection": [
+          "pressure",
+          "psi",
+          "test",
+          "high pressure",
+          "pressure test",
+          "water",
+          "pump",
+          "pipe",
+          "union",
+          "washdown"
+        ],
+        "Hot Work Ignition Precursor": [
+          "furnace",
+          "sparks",
+          "work",
+          "burner",
+          "zone",
+          "grinding",
+          "watch",
+          "hot work",
+          "hot",
+          "engine"
+        ],
+        "Suspended Load Rigging Failure": [
+          "crane",
+          "overhead",
+          "hoist",
+          "derrick",
+          "ton",
+          "lifted",
+          "fell",
+          "webbing",
+          "skid",
+          "attached"
+        ],
+        "Toxic Atmosphere Exposure": [
+          "h2s",
+          "sour",
+          "detector",
+          "sensor",
+          "breathing",
+          "ppm",
+          "fixed",
+          "personal",
+          "crew",
+          "windsock"
+        ],
+        "Uncontained Hydrocarbon Leakage": [
+          "gas",
+          "condensate",
+          "vent",
+          "header",
+          "lel",
+          "level",
+          "hydrocarbon",
+          "near",
+          "scrubber",
+          "droplets"
+        ]
+      }
+    }
+  }
+}
