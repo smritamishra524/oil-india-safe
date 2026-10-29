@@ -24,6 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend code, models, and data
 COPY ml_service /app/ml_service
+COPY src/data /app/src/data
 
 # Copy built frontend assets from Stage 1 into /app/dist
 COPY --from=frontend-builder /build/dist /app/dist

@@ -22,6 +22,7 @@ sys.path.insert(0, PROJECT_ROOT)
 DIST_DIR = os.path.join(PROJECT_ROOT, "dist")
 
 from ml_service.inference import SafetyMLInferenceEngine
+from ml_service.api_router import router as api_router
 
 from contextlib import asynccontextmanager
 
@@ -49,12 +50,16 @@ app.add_middleware(
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "https://oil-india-safe.vercel.app",
+        "https://oil-india-safe.onrender.com",
         "*"
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include Authentication, CMMS and Autopilot router
+app.include_router(api_router)
 
 # Mount static assets directory if Vite build exists
 assets_dir = os.path.join(DIST_DIR, "assets")
